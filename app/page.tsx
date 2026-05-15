@@ -42,12 +42,12 @@ const TIERS = [
     price: "KES 249",
     usd: "≈ $1.90",
     note: "Try it risk-free — airtime price",
-    cardClass: "border-gray-200 bg-white",
-    headerClass: "bg-gray-50 border-b border-gray-100",
-    nameClass: "text-gray-700",
-    priceClass: "text-gray-900",
-    noteClass: "text-gray-400",
-    btn: "bg-gray-900 hover:bg-black text-white",
+    cardClass: "border-white/10 bg-gray-800",
+    headerClass: "bg-gray-800 border-b border-white/10",
+    nameClass: "text-gray-300",
+    priceClass: "text-white",
+    noteClass: "text-gray-500",
+    btn: "bg-white hover:bg-gray-100 text-gray-900 font-bold",
     badgeBg: "",
   },
   {
@@ -57,11 +57,11 @@ const TIERS = [
     price: "KES 699",
     usd: "≈ $5.30",
     note: "Noticeable growth overnight",
-    cardClass: "border-blue-100 bg-white",
-    headerClass: "bg-blue-50 border-b border-blue-100",
-    nameClass: "text-blue-700",
-    priceClass: "text-blue-800",
-    noteClass: "text-blue-400",
+    cardClass: "border-blue-500/30 bg-gray-800",
+    headerClass: "bg-gray-800 border-b border-blue-500/20",
+    nameClass: "text-blue-400",
+    priceClass: "text-white",
+    noteClass: "text-blue-400/60",
     btn: "bg-blue-600 hover:bg-blue-700 text-white",
     badgeBg: "",
   },
@@ -72,7 +72,7 @@ const TIERS = [
     price: "KES 1,299",
     usd: "≈ $9.99",
     note: "Looks fully legitimate",
-    cardClass: "border-blue-500 bg-white shadow-2xl shadow-blue-100",
+    cardClass: "border-blue-500 bg-gray-800 shadow-2xl shadow-blue-500/20",
     headerClass: "bg-blue-600 border-b border-blue-700",
     nameClass: "text-white",
     priceClass: "text-white",
@@ -87,13 +87,13 @@ const TIERS = [
     price: "KES 2,499",
     usd: "≈ $19.20",
     note: "Brand deals start calling",
-    cardClass: "border-indigo-400 bg-white shadow-lg shadow-indigo-100",
+    cardClass: "border-indigo-500 bg-gray-800 shadow-lg shadow-indigo-500/20",
     headerClass: "bg-indigo-600 border-b border-indigo-700",
     nameClass: "text-white",
     priceClass: "text-white",
     noteClass: "text-indigo-200",
     btn: "bg-indigo-600 hover:bg-indigo-700 text-white",
-    badgeBg: "bg-indigo-100 text-indigo-700",
+    badgeBg: "bg-indigo-500 text-white",
   },
   {
     id: "bazuu",
@@ -102,11 +102,11 @@ const TIERS = [
     price: "KES 4,999",
     usd: "≈ $38.40",
     note: "Full Bazuu status — unstoppable",
-    cardClass: "border-yellow-400 bg-gray-900 shadow-xl shadow-yellow-100",
+    cardClass: "border-yellow-400 bg-gray-900 shadow-xl shadow-yellow-400/20",
     headerClass: "bg-gray-900 border-b border-yellow-500/30",
     nameClass: "text-yellow-400",
     priceClass: "text-yellow-400",
-    noteClass: "text-gray-400",
+    noteClass: "text-gray-500",
     btn: "bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-bold",
     badgeBg: "bg-yellow-400 text-gray-900",
   },
@@ -212,7 +212,7 @@ function PaymentModal({ order, onClose }: { order: Order; onClose: () => void })
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
       onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+      <div className="bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-white/10">
         {/* Modal header with brand color */}
         <div className={`bg-gradient-to-r ${platform.gradient} px-6 py-5 flex items-center gap-3`}>
           <platform.Icon size={28} className="text-white" />
@@ -227,8 +227,8 @@ function PaymentModal({ order, onClose }: { order: Order; onClose: () => void })
           {submitted ? (
             <div className="text-center py-6">
               <div className="text-5xl mb-4">🎉</div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Check Your Phone!</h3>
-              <p className="text-gray-500 text-sm">
+              <h3 className="text-xl font-bold text-white mb-2">Check Your Phone!</h3>
+              <p className="text-gray-400 text-sm">
                 An M-Pesa STK push was sent to <strong className="text-gray-900">{phone}</strong>.
                 Enter your PIN to confirm. Delivery starts within minutes.
               </p>
@@ -240,32 +240,32 @@ function PaymentModal({ order, onClose }: { order: Order; onClose: () => void })
           ) : (
             <>
               <div className="mb-5">
-                <p className="text-3xl font-extrabold text-gray-900">{tier.price}</p>
-                <p className="text-sm text-gray-400">{tier.usd}</p>
+                <p className="text-3xl font-extrabold text-white">{tier.price}</p>
+                <p className="text-sm text-gray-500">{tier.usd}</p>
               </div>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label htmlFor="pf-url" className="block text-sm font-semibold text-gray-700 mb-1">
+                  <label htmlFor="pf-url" className="block text-sm font-semibold text-gray-300 mb-1">
                     Your {platform.label} Profile / Page URL
                   </label>
                   <input id="pf-url" type="url" required placeholder={urlPlaceholders[platform.id]}
                     value={url} onChange={e => setUrl(e.target.value)}
-                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50" />
+                    className="w-full border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-800 text-white placeholder-gray-500" />
                 </div>
                 <div>
-                  <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-1">
+                  <label htmlFor="phone" className="block text-sm font-semibold text-gray-300 mb-1">
                     M-Pesa Phone Number
                   </label>
                   <input id="phone" type="tel" required placeholder="0712 345 678"
                     value={phone} onChange={e => setPhone(e.target.value)}
-                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50" />
+                    className="w-full border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-800 text-white placeholder-gray-500" />
                 </div>
                 <button type="submit"
                   className="w-full py-4 rounded-xl bg-green-600 hover:bg-green-700 text-white font-bold text-lg transition flex items-center justify-center gap-2">
                   📱 Pay {tier.price} with M-Pesa
                 </button>
               </form>
-              <p className="text-center text-xs text-gray-400 mt-4">
+              <p className="text-center text-xs text-gray-500 mt-4">
                 🔒 Secure. We never store your PIN or ask for your password.
               </p>
             </>
@@ -308,7 +308,7 @@ function PricingCard({ tier, platformId, onSelect }: {
           {features.delivers.map(f => (
             <li key={f} className="flex items-start gap-2 text-sm">
               <FaCheckCircle className={`flex-shrink-0 mt-0.5 ${isBazuu ? "text-yellow-400" : "text-green-500"}`} size={13} />
-              <span className={isBazuu ? "text-gray-300" : "text-gray-700"}>{f}</span>
+              <span className={isBazuu ? "text-gray-300" : "text-gray-300"}>{f}</span>
             </li>
           ))}
         </ul>
@@ -338,13 +338,13 @@ export default function Home() {
   const activePlatform = PLATFORMS.find(p => p.id === activePlatformId)!;
 
   return (
-    <div className="min-h-screen bg-white text-gray-900">
+    <div className="min-h-screen bg-gray-950 text-white">
 
       {/* ── Navbar ── */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-gray-100 shadow-sm">
+      <header className="sticky top-0 z-40 bg-gray-950/95 backdrop-blur border-b border-white/10 shadow-sm">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <span className="text-2xl font-extrabold tracking-tight">
-            <span className="text-blue-600">Inn</span>Bucks
+          <span className="text-2xl font-extrabold tracking-tight text-white">
+            <span className="text-blue-400">Inn</span>Bucks
           </span>
           <button onClick={() => scrollTo("pricing")}
             className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-5 py-2.5 rounded-full transition shadow-sm shadow-blue-200">
@@ -417,11 +417,11 @@ export default function Home() {
       </section>
 
       {/* ── How It Works ── */}
-      <section id="how-it-works" className="py-20 px-4 bg-white">
+      <section id="how-it-works" className="py-20 px-4 bg-gray-900">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <span className="text-blue-600 text-xs font-bold uppercase tracking-widest">Simple Process</span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mt-2">How It Works</h2>
+            <span className="text-blue-400 text-xs font-bold uppercase tracking-widest">Simple Process</span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-white mt-2">How It Works</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
@@ -429,13 +429,13 @@ export default function Home() {
               { step: "2", icon: "📱", title: "Pay via M-Pesa", body: "Enter your Safaricom number. An STK push lands in seconds — just enter your PIN." },
               { step: "3", icon: "📈", title: "Watch It Land", body: "Followers and views arrive within minutes. No password needed, ever." },
             ].map(item => (
-              <div key={item.step} className="relative bg-white rounded-2xl border border-gray-100 shadow-sm p-8 text-center hover:shadow-md transition">
+              <div key={item.step} className="relative bg-gray-800 rounded-2xl border border-white/10 p-8 text-center hover:border-white/20 transition">
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-7 h-7 bg-blue-600 text-white text-sm font-bold rounded-full flex items-center justify-center shadow">
                   {item.step}
                 </div>
                 <div className="text-4xl mb-4 mt-2">{item.icon}</div>
-                <h3 className="text-base font-bold text-gray-900 mb-2">{item.title}</h3>
-                <p className="text-gray-500 text-sm leading-relaxed">{item.body}</p>
+                <h3 className="text-base font-bold text-white mb-2">{item.title}</h3>
+                <p className="text-gray-400 text-sm leading-relaxed">{item.body}</p>
               </div>
             ))}
           </div>
@@ -463,11 +463,11 @@ export default function Home() {
       </section>
 
       {/* ── Pricing ── */}
-      <section id="pricing" className="py-20 px-4 bg-gray-50">
+      <section id="pricing" className="py-20 px-4 bg-gray-950">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-10">
-            <span className="text-blue-600 text-xs font-bold uppercase tracking-widest">5-Tier Pricing</span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mt-2">Choose Your Platform</h2>
+            <span className="text-blue-400 text-xs font-bold uppercase tracking-widest">5-Tier Pricing</span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-white mt-2">Choose Your Platform</h2>
             <p className="text-gray-500 mt-2">Start with KES 249 to test the system. Scale to Bazuu when ready.</p>
           </div>
 
@@ -480,7 +480,7 @@ export default function Home() {
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border-2 transition-all
                     ${isActive
                       ? `${p.activeBg} ${p.activeText} border-transparent shadow-md scale-105`
-                      : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"}`}>
+                      : "bg-gray-800 text-gray-400 border-white/10 hover:border-white/20 hover:text-white"}`}>
                   <p.Icon size={16} style={isActive ? { color: "white" } : { color: p.brand }} />
                   {p.label}
                 </button>
@@ -493,7 +493,7 @@ export default function Home() {
             <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${activePlatform.gradient} flex items-center justify-center shadow`}>
               <activePlatform.Icon size={22} className="text-white" />
             </div>
-            <h3 className="text-xl font-extrabold text-gray-900">{activePlatform.label} Packages</h3>
+            <h3 className="text-xl font-extrabold text-white">{activePlatform.label} Packages</h3>
           </div>
 
           {/* Cards: 3 top + 2 bottom */}
@@ -510,25 +510,25 @@ export default function Home() {
             ))}
           </div>
 
-          <p className="text-center text-sm text-gray-400 mt-8">
-            💡 <strong className="text-gray-600">Pro tip:</strong> Start with Test Drive. Once you see followers land, come back for Legit or Bazuu.
+          <p className="text-center text-sm text-gray-500 mt-8">
+            💡 <strong className="text-gray-400">Pro tip:</strong> Start with Test Drive. Once you see followers land, come back for Legit or Bazuu.
           </p>
         </div>
       </section>
 
       {/* ── FAQ ── */}
-      <section className="py-20 px-4 bg-white">
+      <section className="py-20 px-4 bg-gray-900">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-10">
-            <h2 className="text-3xl font-extrabold text-gray-900">Common Questions</h2>
+            <h2 className="text-3xl font-extrabold text-white">Common Questions</h2>
           </div>
           {FAQS.map(item => (
-            <details key={item.q} className="border-b border-gray-100 py-5 group cursor-pointer">
-              <summary className="flex justify-between items-center font-semibold text-gray-900 list-none gap-4">
+            <details key={item.q} className="border-b border-white/10 py-5 group cursor-pointer">
+              <summary className="flex justify-between items-center font-semibold text-white list-none gap-4">
                 {item.q}
-                <span className="text-blue-600 text-xl flex-shrink-0 transition-transform group-open:rotate-45">+</span>
+                <span className="text-blue-400 text-xl flex-shrink-0 transition-transform group-open:rotate-45">+</span>
               </summary>
-              <p className="mt-3 text-gray-500 text-sm leading-relaxed">{item.a}</p>
+              <p className="mt-3 text-gray-400 text-sm leading-relaxed">{item.a}</p>
             </details>
           ))}
         </div>
@@ -551,7 +551,7 @@ export default function Home() {
       </footer>
 
       {/* ── Sticky Mobile CTA ── */}
-      <div className="fixed bottom-0 left-0 right-0 z-30 md:hidden bg-white border-t border-gray-100 shadow-2xl px-4 py-3">
+      <div className="fixed bottom-0 left-0 right-0 z-30 md:hidden bg-gray-900 border-t border-white/10 shadow-2xl px-4 py-3">
         <button onClick={() => scrollTo("pricing")}
           className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl text-base transition">
           📱 Start from KES 249 — Pay with M-Pesa
