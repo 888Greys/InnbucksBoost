@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   FaFacebook, FaInstagram, FaYoutube, FaTelegram, FaSpotify,
   FaShieldAlt, FaBolt, FaCrown, FaWhatsapp, FaCheckCircle,
+  FaChevronLeft, FaChevronRight,
 } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import { SiTiktok } from "react-icons/si";
@@ -15,11 +16,11 @@ type Platform = {
   id: string;
   label: string;
   Icon: IconType;
-  brand: string;       // hex for active tab bg
-  textLight: string;   // tailwind text class for light bg
-  activeBg: string;    // tailwind bg for active tab
-  activeText: string;  // tailwind text for active tab
-  gradient: string;    // hero icon bg gradient
+  brand: string;
+  textLight: string;
+  activeBg: string;
+  activeText: string;
+  gradient: string;
 };
 
 const PLATFORMS: Platform[] = [
@@ -168,10 +169,10 @@ const PLATFORM_FEATURES: { [platform: string]: TierFeatures } = {
 };
 
 const TRUST = [
-  { Icon: FaShieldAlt, label: "Secure M-Pesa", color: "text-blue-500" },
-  { Icon: FaBolt,      label: "Fast Delivery",  color: "text-yellow-500" },
+  { Icon: FaShieldAlt,   label: "Secure M-Pesa",    color: "text-blue-500" },
+  { Icon: FaBolt,        label: "Fast Delivery",     color: "text-yellow-500" },
   { Icon: FaCheckCircle, label: "Drop-Proof Refill", color: "text-green-500" },
-  { Icon: FaWhatsapp,  label: "24/7 Support",   color: "text-green-600" },
+  { Icon: FaWhatsapp,    label: "24/7 Support",      color: "text-green-600" },
 ];
 
 const FAQS = [
@@ -182,6 +183,14 @@ const FAQS = [
   { q: "Which platforms do you support?", a: "Facebook, Instagram, TikTok, YouTube, X/Twitter, Telegram, and Spotify — with more coming soon." },
   { q: "Can I order multiple packages?", a: "Yes. Many customers start with Test Drive, confirm it works, then order Legit or Influencer in the same session." },
 ];
+
+// ─── Carousel data (Legit Profile highlight across all platforms) ──────────────
+
+const CAROUSEL_SLIDES = PLATFORMS.map(p => ({
+  platform: p,
+  tier: TIERS.find(t => t.id === "legit")!,
+  features: PLATFORM_FEATURES[p.id]["legit"],
+}));
 
 // ─── Payment Modal ────────────────────────────────────────────────────────────
 
@@ -213,7 +222,6 @@ function PaymentModal({ order, onClose }: { order: Order; onClose: () => void })
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
       onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-white/10">
-        {/* Modal header with brand color */}
         <div className={`bg-gradient-to-r ${platform.gradient} px-6 py-5 flex items-center gap-3`}>
           <platform.Icon size={28} className="text-white" />
           <div>
@@ -229,7 +237,7 @@ function PaymentModal({ order, onClose }: { order: Order; onClose: () => void })
               <div className="text-5xl mb-4">🎉</div>
               <h3 className="text-xl font-bold text-white mb-2">Check Your Phone!</h3>
               <p className="text-gray-400 text-sm">
-                An M-Pesa STK push was sent to <strong className="text-gray-900">{phone}</strong>.
+                An M-Pesa STK push was sent to <strong className="text-white">{phone}</strong>.
                 Enter your PIN to confirm. Delivery starts within minutes.
               </p>
               <button onClick={onClose}
@@ -294,7 +302,6 @@ function PricingCard({ tier, platformId, onSelect }: {
         </span>
       )}
 
-      {/* Card header */}
       <div className={`px-5 pt-6 pb-5 ${tier.headerClass}`}>
         <h3 className={`text-base font-extrabold ${tier.nameClass}`}>{tier.name}</h3>
         <p className={`text-3xl font-extrabold mt-1 ${tier.priceClass}`}>{tier.price}</p>
@@ -302,19 +309,17 @@ function PricingCard({ tier, platformId, onSelect }: {
         <p className={`text-xs mt-2 italic ${tier.noteClass}`}>&ldquo;{tier.note}&rdquo;</p>
       </div>
 
-      {/* Features */}
       <div className="flex-1 px-5 py-5">
         <ul className="space-y-2.5">
           {features.delivers.map(f => (
             <li key={f} className="flex items-start gap-2 text-sm">
               <FaCheckCircle className={`flex-shrink-0 mt-0.5 ${isBazuu ? "text-yellow-400" : "text-green-500"}`} size={13} />
-              <span className={isBazuu ? "text-gray-300" : "text-gray-300"}>{f}</span>
+              <span className="text-gray-300">{f}</span>
             </li>
           ))}
         </ul>
       </div>
 
-      {/* CTA */}
       <div className="px-5 pb-5">
         <button onClick={onSelect}
           className={`w-full py-3.5 rounded-xl font-bold text-sm transition ${tier.btn}`}>
@@ -325,11 +330,113 @@ function PricingCard({ tier, platformId, onSelect }: {
   );
 }
 
+// ─── Packages Carousel ────────────────────────────────────────────────────────
+
+function PackagesCarousel({ onOrder }: { onOrder: (order: Order) => void }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canLeft, setCanLeft] = useState(false);
+  const [canRight, setCanRight] = useState(true);
+
+  function updateArrows() {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanLeft(el.scrollLeft > 8);
+    setCanRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 8);
+  }
+
+  function slide(dir: "left" | "right") {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir === "right" ? 300 : -300, behavior: "smooth" });
+  }
+
+  return (
+    <div className="relative">
+      {/* Arrow: left */}
+      <button
+        onClick={() => slide("left")}
+        disabled={!canLeft}
+        aria-label="Scroll left"
+        className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-gray-800 border border-white/10 flex items-center justify-center shadow-lg transition -translate-x-1/2
+          ${canLeft ? "text-white hover:bg-gray-700" : "text-gray-600 cursor-not-allowed"}`}>
+        <FaChevronLeft size={14} />
+      </button>
+
+      {/* Scrollable row */}
+      <div
+        ref={scrollRef}
+        onScroll={updateArrows}
+        className="flex gap-4 overflow-x-auto scroll-smooth pb-2 px-2"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+        {CAROUSEL_SLIDES.map(({ platform, tier, features }) => (
+          <div key={platform.id}
+            className="flex-shrink-0 w-64 rounded-2xl border border-white/10 bg-gray-800 overflow-hidden hover:-translate-y-1 transition-transform duration-200">
+            {/* Card header */}
+            <div className={`bg-gradient-to-r ${platform.gradient} px-4 py-4 flex items-center gap-3`}>
+              <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
+                <platform.Icon size={20} className="text-white" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-white font-extrabold text-sm leading-tight">{platform.label}</p>
+                <p className="text-white/70 text-xs">{tier.name}</p>
+              </div>
+              <span className="ml-auto text-xs font-bold bg-yellow-400 text-gray-900 px-2 py-0.5 rounded-full flex-shrink-0">
+                🔥 Best Value
+              </span>
+            </div>
+
+            {/* Price */}
+            <div className="px-4 pt-4 pb-2 border-b border-white/10">
+              <p className="text-2xl font-extrabold text-white">{tier.price}</p>
+              <p className="text-gray-500 text-xs">{tier.usd}</p>
+            </div>
+
+            {/* Features */}
+            <ul className="px-4 py-3 space-y-1.5">
+              {features.delivers.slice(0, 4).map(f => (
+                <li key={f} className="flex items-center gap-2 text-xs text-gray-300">
+                  <FaCheckCircle className="text-green-500 flex-shrink-0" size={11} />
+                  {f}
+                </li>
+              ))}
+            </ul>
+
+            {/* CTA */}
+            <div className="px-4 pb-4">
+              <button
+                onClick={() => onOrder({ tier, platform })}
+                className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition">
+                Order Now — {tier.price}
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Arrow: right */}
+      <button
+        onClick={() => slide("right")}
+        disabled={!canRight}
+        aria-label="Scroll right"
+        className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-gray-800 border border-white/10 flex items-center justify-center shadow-lg transition translate-x-1/2
+          ${canRight ? "text-white hover:bg-gray-700" : "text-gray-600 cursor-not-allowed"}`}>
+        <FaChevronRight size={14} />
+      </button>
+    </div>
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function Home() {
   const [activePlatformId, setActivePlatformId] = useState("facebook");
   const [order, setOrder] = useState<Order | null>(null);
+  const [showCta, setShowCta] = useState(true);
+
+  useEffect(() => {
+    const t = setTimeout(() => setShowCta(false), 5000);
+    return () => clearTimeout(t);
+  }, []);
 
   function scrollTo(id: string) {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
@@ -355,7 +462,6 @@ export default function Home() {
 
       {/* ── Hero ── */}
       <section className="relative overflow-hidden bg-gray-950 pt-20 pb-24 px-4">
-        {/* Background glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-blue-600/20 blur-3xl rounded-full pointer-events-none" />
         <div className="absolute bottom-0 right-0 w-72 h-72 bg-indigo-600/10 blur-3xl rounded-full pointer-events-none" />
 
@@ -376,7 +482,6 @@ export default function Home() {
             delivery starts in minutes.
           </p>
 
-          {/* Platform icon grid */}
           <div className="flex flex-wrap justify-center gap-3 mb-10">
             {PLATFORMS.map(p => (
               <button key={p.id}
@@ -399,7 +504,6 @@ export default function Home() {
             </button>
           </div>
 
-          {/* Trust badges */}
           <div className="mt-12 flex flex-wrap justify-center gap-3">
             {TRUST.map(b => (
               <div key={b.label}
@@ -418,26 +522,48 @@ export default function Home() {
 
       {/* ── How It Works ── */}
       <section id="how-it-works" className="py-20 px-4 bg-gray-900">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-14">
             <span className="text-blue-400 text-xs font-bold uppercase tracking-widest">Simple Process</span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-white mt-2">How It Works</h2>
+            <p className="text-gray-500 text-sm mt-2">Three steps. Done in under 2 minutes.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+          {/* Overlapping stacked cards */}
+          <div className="relative flex flex-col">
             {[
-              { step: "1", icon: "📦", title: "Pick Your Platform & Package", body: "Choose your social network and tier — from KES 249 Test Drive to KES 4,999 Bazuu VIP." },
-              { step: "2", icon: "📱", title: "Pay via M-Pesa", body: "Enter your Safaricom number. An STK push lands in seconds — just enter your PIN." },
-              { step: "3", icon: "📈", title: "Watch It Land", body: "Followers and views arrive within minutes. No password needed, ever." },
-            ].map(item => (
-              <div key={item.step} className="relative bg-gray-800 rounded-2xl border border-white/10 p-8 text-center hover:border-white/20 transition">
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-7 h-7 bg-blue-600 text-white text-sm font-bold rounded-full flex items-center justify-center shadow">
-                  {item.step}
+              { step: "1", icon: "📦", title: "Pick Your Platform & Package", body: "Choose your social network and tier — from KES 249 Test Drive to KES 4,999 Bazuu VIP.", rotate: "-rotate-1", zClass: "z-10" },
+              { step: "2", icon: "📱", title: "Pay via M-Pesa in Seconds", body: "Enter your Safaricom number. An STK push lands instantly — just enter your PIN. No card, no bank.", rotate: "rotate-1", zClass: "z-20" },
+              { step: "3", icon: "📈", title: "Watch Your Numbers Climb", body: "Followers and views arrive within minutes of payment. No login needed, no password ever shared.", rotate: "-rotate-1", zClass: "z-30" },
+            ].map((item, i) => (
+              <div
+                key={item.step}
+                className={`relative bg-gray-800 rounded-2xl border border-white/10 px-8 py-7 shadow-2xl transition-transform duration-300 hover:rotate-0 hover:scale-[1.02] hover:shadow-blue-900/30 ${item.rotate} ${item.zClass} ${i > 0 ? "-mt-4" : ""}`}>
+                <div className="flex items-start gap-5">
+                  <div className="flex-shrink-0 w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-900/50">
+                    <span className="text-xl">{item.icon}</span>
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-blue-400 text-xs font-bold uppercase tracking-widest">Step {item.step}</span>
+                    </div>
+                    <h3 className="text-white font-extrabold text-base mb-1.5">{item.title}</h3>
+                    <p className="text-gray-400 text-sm leading-relaxed">{item.body}</p>
+                  </div>
                 </div>
-                <div className="text-4xl mb-4 mt-2">{item.icon}</div>
-                <h3 className="text-base font-bold text-white mb-2">{item.title}</h3>
-                <p className="text-gray-400 text-sm leading-relaxed">{item.body}</p>
               </div>
             ))}
+          </div>
+
+          {/* Support note */}
+          <div className="mt-8 flex items-center gap-4 bg-green-900/30 border border-green-700/40 rounded-2xl px-6 py-4">
+            <FaWhatsapp size={28} className="text-green-400 flex-shrink-0" />
+            <div>
+              <p className="text-white font-semibold text-sm">Bought a package? We&apos;re here for you.</p>
+              <p className="text-gray-400 text-xs mt-0.5">
+                After your purchase, WhatsApp our support team for order updates, questions, or any help. Available 24/7.
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -471,7 +597,7 @@ export default function Home() {
             <p className="text-gray-500 mt-2">Start with KES 249 to test the system. Scale to Bazuu when ready.</p>
           </div>
 
-          {/* Platform Tabs with real icons */}
+          {/* Platform Tabs */}
           <div className="flex flex-wrap justify-center gap-2 mb-10">
             {PLATFORMS.map(p => {
               const isActive = activePlatformId === p.id;
@@ -516,8 +642,23 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── Packages Carousel ── */}
+      <section className="py-16 px-4 bg-gray-900 border-t border-white/5">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-10">
+            <span className="text-blue-400 text-xs font-bold uppercase tracking-widest">All Platforms</span>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-white mt-2">Most Popular Package</h2>
+            <p className="text-gray-500 text-sm mt-1">Legit Profile — KES 1,299 across every platform</p>
+          </div>
+          <PackagesCarousel onOrder={setOrder} />
+          <p className="text-center text-xs text-gray-600 mt-6">
+            Swipe or use arrows to browse all 7 platforms
+          </p>
+        </div>
+      </section>
+
       {/* ── FAQ ── */}
-      <section className="py-20 px-4 bg-gray-900">
+      <section className="py-20 px-4 bg-gray-950">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-10">
             <h2 className="text-3xl font-extrabold text-white">Common Questions</h2>
@@ -535,12 +676,11 @@ export default function Home() {
       </section>
 
       {/* ── Footer ── */}
-      <footer className="bg-gray-950 text-gray-500 py-10 px-4">
+      <footer className="bg-gray-950 text-gray-500 py-10 px-4 border-t border-white/5">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
           <span className="font-extrabold text-white text-lg">
             <span className="text-blue-400">Inn</span>Bucks
           </span>
-          {/* Platform icons row */}
           <div className="flex items-center gap-4">
             {PLATFORMS.map(p => (
               <p.Icon key={p.id} size={18} style={{ color: p.brand }} className="opacity-70 hover:opacity-100 transition cursor-pointer" />
@@ -550,8 +690,9 @@ export default function Home() {
         </div>
       </footer>
 
-      {/* ── Sticky Mobile CTA ── */}
-      <div className="fixed bottom-0 left-0 right-0 z-30 md:hidden bg-gray-900 border-t border-white/10 shadow-2xl px-4 py-3">
+      {/* ── Sticky Mobile CTA (auto-hides after 5 s) ── */}
+      <div className={`fixed bottom-0 left-0 right-0 z-30 md:hidden bg-gray-900 border-t border-white/10 shadow-2xl px-4 py-3 transition-all duration-500
+        ${showCta ? "opacity-100 translate-y-0" : "opacity-0 translate-y-full pointer-events-none"}`}>
         <button onClick={() => scrollTo("pricing")}
           className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl text-base transition">
           📱 Start from KES 249 — Pay with M-Pesa
