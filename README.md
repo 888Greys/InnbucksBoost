@@ -149,20 +149,31 @@ git add <files>
 git commit -m "your message"
 git push origin main
 
-# 2. On VPS — pull, build, restart
+# 2. On VPS — pull and sync files from main branch
 cd ~/Innbucks
-git pull
+git fetch origin
+git checkout origin/main -- cmd/server/main.go cmd/worker/main.go cmd/bot/main.go \
+  internal/bot/bot.go internal/bot/handler.go internal/bot/packages.go \
+  internal/queue/queue.go go.mod
+go mod tidy
 
+# 3. Build all three binaries
 go build -o /opt/innbucks/bin/innbucks-server ./cmd/server
 go build -o /opt/innbucks/bin/innbucks-worker ./cmd/worker
 go build -o /opt/innbucks/bin/innbucks-bot    ./cmd/bot
 
-sudo systemctl stop innbucks-bot
-cp /opt/innbucks/bin/innbucks-bot /opt/innbucks/bin/bot
-sudo systemctl restart innbucks-server innbucks-worker innbucks-bot
+# 4. Stop, copy, start (all at once)
+sudo systemctl stop innbucks-server innbucks-worker innbucks-bot
+cp /opt/innbucks/bin/innbucks-server /opt/innbucks/bin/server
+cp /opt/innbucks/bin/innbucks-worker /opt/innbucks/bin/worker
+cp /opt/innbucks/bin/innbucks-bot    /opt/innbucks/bin/bot
+sudo systemctl start innbucks-server innbucks-worker innbucks-bot
+
+# 5. Verify
+sudo systemctl status innbucks-server innbucks-worker innbucks-bot --no-pager
 ```
 
-> The bot binary must be copied to `bot` (not `innbucks-bot`) because that is what the systemd unit expects. Stop the service first to avoid "Text file busy".
+> The VPS is on the `backend` branch but all changes are pushed to `main`. Use `git checkout origin/main -- <files>` to sync specific files rather than `git pull`. Each service binary name differs from the build output — the copy step is mandatory or the old binary keeps running.
 
 ---
 
