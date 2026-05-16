@@ -63,7 +63,7 @@ func main() {
 	mux.HandleFunc("/webhook/megapay", megapayHandler(store, wiz, tg, q, webhookSecret))
 
 	mux.HandleFunc("/api/packages", packagesHandler())
-	mux.HandleFunc("/api/orders", ordersHandler(store, pay))
+	mux.HandleFunc("/api/orders", ordersHandler(store, pay, tg))
 	mux.HandleFunc("/api/orders/", orderStatusHandler(store))
 	mux.HandleFunc("/api/profile", profileLookupHandler())
 
@@ -173,7 +173,7 @@ type createOrderResp struct {
 	Message string `json:"message"`
 }
 
-func ordersHandler(store *db.Store, pay *megapay.Client) http.HandlerFunc {
+func ordersHandler(store *db.Store, pay *megapay.Client, tg *tgNotifier) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -223,6 +223,23 @@ func ordersHandler(store *db.Store, pay *megapay.Client) http.HandlerFunc {
 		}
 
 		log.Printf("web order %d created: pkg=%s phone=%s txn=%s", orderID, pkg.ID, phone, stkResp.TransactionRequestID)
+
+		profileDisplay := req.ProfileLink
+		if len(profileDisplay) > 50 {
+			profileDisplay = profileDisplay[:47] + "..."
+		}
+		tg.sendAdmin(fmt.Sprintf(
+			"🌐 *New Web Order #%d*\n\n"+
+				"📦 %s\n"+
+				"💰 KES %d\n"+
+				"📱 Phone: `%s`\n"+
+				"🔗 %s\n"+
+				"🕐 %s\n\n"+
+				"⏳ Waiting for M-Pesa payment…",
+			orderID, pkg.Name, pkg.PriceKES,
+			req.Phone, profileDisplay,
+			time.Now().Format("02 Jan 15:04 MST"),
+		), nil)
 
 		jsonOK(w, createOrderResp{
 			OrderID: orderID,
