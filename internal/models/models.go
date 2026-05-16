@@ -19,6 +19,10 @@ const (
 	PlatformTikTok    Platform = "tiktok"
 	PlatformInstagram Platform = "instagram"
 	PlatformYouTube   Platform = "youtube"
+	PlatformFacebook  Platform = "facebook"
+	PlatformTwitter   Platform = "twitter"
+	PlatformTelegram  Platform = "telegram"
+	PlatformSpotify   Platform = "spotify"
 )
 
 type Package struct {
