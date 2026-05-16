@@ -442,7 +442,7 @@ type tgInlineBtn struct {
 
 func newTGNotifier(mainToken, adminToken string, adminChat int64) *tgNotifier {
 	if adminToken == "" {
-		log.Println("ADMIN_BOT_TOKEN not set — admin payment notifications disabled")
+		log.Println("ADMIN_BOT_TOKEN not set — using main bot token for admin notifications")
 	}
 	return &tgNotifier{mainToken: mainToken, adminToken: adminToken, adminChat: adminChat}
 }
@@ -452,10 +452,14 @@ func (n *tgNotifier) sendClient(chatID int64, text string) {
 }
 
 func (n *tgNotifier) sendAdmin(text string, kb *tgInlineKb) {
-	if n.adminToken == "" || n.adminChat == 0 {
+	if n.adminChat == 0 {
 		return
 	}
-	n.post(n.adminToken, n.adminChat, text, kb)
+	token := n.adminToken
+	if token == "" {
+		token = n.mainToken
+	}
+	n.post(token, n.adminChat, text, kb)
 }
 
 func (n *tgNotifier) post(token string, chatID int64, text string, kb *tgInlineKb) {
