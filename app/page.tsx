@@ -37,6 +37,21 @@ const PLATFORMS: Platform[] = [
 
 const TIERS = [
   {
+    id: "5ksh-test",
+    name: "5-Bob Test",
+    badge: "🧪 Dev Only",
+    price: "KES 5",
+    usd: "≈ $0.04",
+    note: "Internal test — remove before launch",
+    cardClass: "border-red-500/50 bg-gray-800",
+    headerClass: "bg-gray-800 border-b border-red-500/30",
+    nameClass: "text-red-400",
+    priceClass: "text-white",
+    noteClass: "text-red-400/60",
+    btn: "bg-red-600 hover:bg-red-700 text-white",
+    badgeBg: "bg-red-500 text-white",
+  },
+  {
     id: "test-drive",
     name: "Test Drive",
     badge: null,
@@ -205,6 +220,12 @@ const TIER_EXTRAS: Record<string, string[]> = {
 function buildDynamicFeatures(packages: ApiPackage[]): typeof PLATFORM_FEATURES {
   const result: typeof PLATFORM_FEATURES = {};
   for (const pkg of packages) {
+    // Temporary KES 5 test package
+    if (pkg.id === "tiktok_test_5ksh") {
+      if (!result["tiktok"]) result["tiktok"] = {};
+      result["tiktok"]["5ksh-test"] = { packageId: pkg.id, mtpId: 0, qty: 0, delivers: ["50 TikTok Followers", "Instant Delivery", "Test Only"] };
+      continue;
+    }
     if (!pkg.id.includes("_web_")) continue;
     const suffix = pkg.id.replace(`${pkg.platform}_web_`, "");
     const tierId = TIER_SUFFIX_MAP[suffix];
