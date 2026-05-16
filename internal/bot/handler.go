@@ -251,7 +251,7 @@ func (b *Bot) editToPlatformPackages(chatID int64, msgID int, category string) {
 	for _, pkg := range packages {
 		rows = append(rows, tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(
-				fmt.Sprintf("%s %s — KES %d", platformEmoji(string(pkg.Platform)), pkg.Name, pkg.PriceKES),
+				tierButtonLabel(pkg),
 				"pkg:"+pkg.ID,
 			),
 		))
@@ -270,22 +270,32 @@ func (b *Bot) editToPlatformPackages(chatID int64, msgID int, category string) {
 func categoryKeyboard() tgbotapi.InlineKeyboardMarkup {
 	return tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("🎵 TikTok", "cat:tiktok"),
+			tgbotapi.NewInlineKeyboardButtonData("👥 Facebook", "cat:facebook"),
 			tgbotapi.NewInlineKeyboardButtonData("📸 Instagram", "cat:instagram"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("🎵 TikTok", "cat:tiktok"),
 			tgbotapi.NewInlineKeyboardButtonData("▶️ YouTube", "cat:youtube"),
-			tgbotapi.NewInlineKeyboardButtonData("💎 Combo Deals", "cat:combo"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("𝕏 Twitter", "cat:twitter"),
+			tgbotapi.NewInlineKeyboardButtonData("✈️ Telegram", "cat:telegram"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("🎧 Spotify", "cat:spotify"),
 		),
 	)
 }
 
 func categoryHeader(cat string) string {
 	headers := map[string]string{
-		"tiktok":    "🎵 *TikTok Packages*\n\nGrow your TikTok with real followers, views & likes:",
-		"instagram": "📸 *Instagram Packages*\n\nBoost your Instagram with HQ followers and engagement:",
-		"youtube":   "▶️ *YouTube Packages*\n\nGrow your channel with real subscribers and views:",
-		"combo":     "💎 *Combo Deals*\n\nMaximum growth at the best value:",
+		"facebook":  "👥 *Facebook Packages*\n\n_Blow up your Page. Real followers, real reach._\n\nPick your level 👇",
+		"instagram": "📸 *Instagram Packages*\n\n_Flood your Reels with views. Watch the algorithm love you._\n\nPick your level 👇",
+		"tiktok":    "🎵 *TikTok Packages*\n\n_Blow up your TikTok. Real views, real growth._\n\nPick your level 👇",
+		"youtube":   "▶️ *YouTube Packages*\n\n_Get your videos seen. Grow your channel fast._\n\nPick your level 👇",
+		"twitter":   "𝕏 *X / Twitter Packages*\n\n_Boost your Tweet impressions. Make your posts trend._\n\nPick your level 👇",
+		"telegram":  "✈️ *Telegram Packages*\n\n_Pack your channel. Build a real audience fast._\n\nPick your level 👇",
+		"spotify":   "🎧 *Spotify Packages*\n\n_Get your music heard. Real plays, real streams._\n\nPick your level 👇",
 	}
 	if h, ok := headers[cat]; ok {
 		return h
@@ -593,8 +603,9 @@ func (b *Bot) initiatePayment(ctx context.Context, chatID, orderID int64, amount
 func (b *Bot) sendWelcome(chatID int64) {
 	b.sendTextWithKeyboard(chatID,
 		"👋 *Welcome to InnBoost!*\n\n🚀 Grow your social media fast & affordably.\n\n"+
-			"✅ Real followers, likes & views\n"+
-			"✅ TikTok • Instagram • YouTube\n"+
+			"✅ Real views, followers & plays\n"+
+			"✅ 7 platforms: TikTok • Instagram • YouTube\n"+
+			"   Facebook • X/Twitter • Telegram • Spotify\n"+
 			"✅ Pay securely with M-Pesa\n"+
 			"✅ Delivery starts within the hour\n\n"+
 			"Tap 🛍 *Shop* to browse packages.",
@@ -900,6 +911,14 @@ func platformEmoji(platform string) string {
 		return "📸"
 	case "youtube":
 		return "▶️"
+	case "facebook":
+		return "👥"
+	case "twitter":
+		return "𝕏"
+	case "telegram":
+		return "✈️"
+	case "spotify":
+		return "🎧"
 	default:
 		return "📱"
 	}
@@ -913,9 +932,44 @@ func platformName(platform string) string {
 		return "Instagram"
 	case "youtube":
 		return "YouTube"
+	case "facebook":
+		return "Facebook"
+	case "twitter":
+		return "X/Twitter"
+	case "telegram":
+		return "Telegram"
+	case "spotify":
+		return "Spotify"
 	default:
 		return "social media"
 	}
+}
+
+func tierEmoji(pkgID string) string {
+	switch {
+	case strings.HasSuffix(pkgID, "_test"):
+		return "🔥"
+	case strings.HasSuffix(pkgID, "_starter"):
+		return "⚡"
+	case strings.HasSuffix(pkgID, "_legit"):
+		return "💎"
+	case strings.HasSuffix(pkgID, "_influencer"):
+		return "👑"
+	case strings.HasSuffix(pkgID, "_bazuu"):
+		return "🦁"
+	default:
+		return "📦"
+	}
+}
+
+func tierButtonLabel(pkg Package) string {
+	// Strip platform name prefix to get just the tier label
+	tierName := pkg.Name
+	platforms := []string{"Facebook ", "Instagram ", "TikTok ", "YouTube ", "X/Twitter ", "Telegram ", "Spotify "}
+	for _, p := range platforms {
+		tierName = strings.TrimPrefix(tierName, p)
+	}
+	return fmt.Sprintf("%s %s — KES %d · %s", tierEmoji(pkg.ID), tierName, pkg.PriceKES, pkg.Description)
 }
 
 func refillLine(pkg Package) string {

@@ -1,6 +1,10 @@
 package bot
 
-import "github.com/aapom/innbucks/internal/models"
+import (
+	"strings"
+
+	"github.com/aapom/innbucks/internal/models"
+)
 
 // Service IDs and wholesale rates from morethanpanel.com (USD/1000 at 130 KES/USD):
 // TikTok Followers ID:5760  — $2.44 — 30 Day Refill, 5-10K/Day
@@ -167,12 +171,14 @@ var Catalog = []models.Package{
 func CategoryPackages(category string) []models.Package {
 	var result []models.Package
 	for _, p := range Catalog {
-		if p.ID == "test_ksh1" {
+		if p.Category != category {
 			continue
 		}
-		if p.Category == category {
-			result = append(result, p)
+		// Only show the new web tier packages in the bot menu
+		if !strings.Contains(p.ID, "_web_") {
+			continue
 		}
+		result = append(result, p)
 	}
 	return result
 }
