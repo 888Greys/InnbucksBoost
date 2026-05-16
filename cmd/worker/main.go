@@ -17,6 +17,7 @@ import (
 	"github.com/aapom/innbucks/internal/db"
 	"github.com/aapom/innbucks/internal/megapay"
 	"github.com/aapom/innbucks/internal/models"
+	"github.com/aapom/innbucks/internal/queue"
 	"github.com/aapom/innbucks/internal/smmpanel"
 )
 
@@ -51,7 +52,18 @@ func main() {
 		proofChannelID, _ = strconv.ParseInt(ch, 10, 64)
 	}
 
+	redisAddr := os.Getenv("REDIS_ADDR")
+	if redisAddr == "" {
+		redisAddr = "127.0.0.1:6379"
+	}
+	maxConcurrent, _ := strconv.Atoi(os.Getenv("QUEUE_MAX_CONCURRENT"))
+	if maxConcurrent == 0 {
+		maxConcurrent = 5
+	}
+	q := queue.New(redisAddr, maxConcurrent)
+
 	paymentTicker := time.NewTicker(10 * time.Second)
+	queueTicker := time.NewTicker(15 * time.Second)
 	orderTicker := time.NewTicker(2 * time.Minute)
 	refillTicker := time.NewTicker(24 * time.Hour)
 	balanceTicker := time.NewTicker(12 * time.Hour)
@@ -66,7 +78,9 @@ func main() {
 			log.Println("worker stopped")
 			return
 		case <-paymentTicker.C:
-			pollPayments(ctx, store, pay, wiz, tgAPI, adminIDs, proofChannelID)
+			pollPayments(ctx, store, pay, wiz, q, tgAPI, adminIDs, proofChannelID)
+		case <-queueTicker.C:
+			processQueue(ctx, store, wiz, q, tgAPI)
 		case <-orderTicker.C:
 			pollOrders(ctx, store, wiz, tgAPI, proofChannelID)
 		case <-refillTicker.C:
@@ -77,7 +91,7 @@ func main() {
 	}
 }
 
-func pollPayments(ctx context.Context, store *db.Store, pay *megapay.Client, wiz *smmpanel.Client, tg *tgbotapi.BotAPI, adminIDs []int64, proofChannelID int64) {
+func pollPayments(ctx context.Context, store *db.Store, pay *megapay.Client, wiz *smmpanel.Client, q *queue.Queue, tg *tgbotapi.BotAPI, adminIDs []int64, proofChannelID int64) {
 	txns, err := store.GetPendingSTKTransactions(ctx)
 	if err != nil {
 		log.Printf("getPendingSTK: %v", err)
@@ -116,7 +130,40 @@ func pollPayments(ctx context.Context, store *db.Store, pay *megapay.Client, wiz
 		notifyAdmins(tg, adminIDs, fmt.Sprintf("💰 Payment confirmed for Order #%d — KES %d (receipt: %s)",
 			txn.OrderID, txn.AmountKES, status.TransactionReceipt))
 
-		go fulfillOrder(ctx, store, wiz, tg, txn.OrderID, proofChannelID)
+		if err := q.Push(ctx, txn.OrderID); err != nil {
+			log.Printf("order %d: queue push failed (%v) — fulfilling directly", txn.OrderID, err)
+			go fulfillOrder(ctx, store, wiz, tg, txn.OrderID, proofChannelID)
+		} else {
+			log.Printf("order %d queued for fulfillment", txn.OrderID)
+		}
+	}
+}
+
+func processQueue(ctx context.Context, store *db.Store, wiz *smmpanel.Client, q *queue.Queue, tg *tgbotapi.BotAPI) {
+	for {
+		ok, err := q.CanProcess(ctx)
+		if err != nil {
+			log.Printf("processQueue canProcess: %v", err)
+			return
+		}
+		if !ok {
+			return
+		}
+
+		orderID, found, err := q.Pop(ctx)
+		if err != nil {
+			log.Printf("processQueue pop: %v", err)
+			return
+		}
+		if !found {
+			return
+		}
+
+		q.IncrActive(ctx)
+		go func(oid int64) {
+			defer q.DecrActive(ctx)
+			fulfillOrder(ctx, store, wiz, tg, oid, 0)
+		}(orderID)
 	}
 }
 

@@ -30,6 +30,14 @@ type Store interface {
 
 type Package = models.Package
 
+// OrderQueue is the interface the bot uses to control the fulfillment queue.
+type OrderQueue interface {
+	Push(ctx context.Context, orderID int64) error
+	Pause(ctx context.Context) error
+	Resume(ctx context.Context) error
+	Stats(ctx context.Context) (depth, active int64, paused bool, err error)
+}
+
 type Bot struct {
 	api            *tgbotapi.BotAPI
 	wiz            *smmpanel.Client
@@ -38,14 +46,15 @@ type Bot struct {
 	adminIDs       []int64
 	proofChannelID int64
 	notifier       *AdminNotifier
+	queue          OrderQueue
 }
 
-func New(token string, wiz *smmpanel.Client, pay *megapay.Client, store Store, adminIDs []int64, proofChannelID int64, notifier *AdminNotifier) (*Bot, error) {
+func New(token string, wiz *smmpanel.Client, pay *megapay.Client, store Store, adminIDs []int64, proofChannelID int64, notifier *AdminNotifier, q OrderQueue) (*Bot, error) {
 	api, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
 		return nil, err
 	}
-	return &Bot{api: api, wiz: wiz, pay: pay, store: store, adminIDs: adminIDs, proofChannelID: proofChannelID, notifier: notifier}, nil
+	return &Bot{api: api, wiz: wiz, pay: pay, store: store, adminIDs: adminIDs, proofChannelID: proofChannelID, notifier: notifier, queue: q}, nil
 }
 
 func (b *Bot) Run(ctx context.Context) {

@@ -13,6 +13,7 @@ import (
 	"github.com/aapom/innbucks/internal/bot"
 	"github.com/aapom/innbucks/internal/db"
 	"github.com/aapom/innbucks/internal/megapay"
+	"github.com/aapom/innbucks/internal/queue"
 	"github.com/aapom/innbucks/internal/smmpanel"
 )
 
@@ -55,7 +56,17 @@ func main() {
 		log.Println("admin notifier disabled (ADMIN_BOT_TOKEN / ADMIN_CHAT_ID not set)")
 	}
 
-	b, err := bot.New(mustEnv("TELEGRAM_BOT_TOKEN"), wiz, pay, store, adminIDs, proofChannelID, notifier)
+	redisAddr := os.Getenv("REDIS_ADDR")
+	if redisAddr == "" {
+		redisAddr = "127.0.0.1:6379"
+	}
+	maxConcurrent, _ := strconv.Atoi(os.Getenv("QUEUE_MAX_CONCURRENT"))
+	if maxConcurrent == 0 {
+		maxConcurrent = 5
+	}
+	q := queue.New(redisAddr, maxConcurrent)
+
+	b, err := bot.New(mustEnv("TELEGRAM_BOT_TOKEN"), wiz, pay, store, adminIDs, proofChannelID, notifier, q)
 	if err != nil {
 		log.Fatalf("bot init: %v", err)
 	}

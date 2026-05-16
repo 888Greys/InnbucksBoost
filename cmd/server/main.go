@@ -23,6 +23,7 @@ import (
 	"github.com/aapom/innbucks/internal/db"
 	"github.com/aapom/innbucks/internal/megapay"
 	"github.com/aapom/innbucks/internal/profile"
+	"github.com/aapom/innbucks/internal/queue"
 	"github.com/aapom/innbucks/internal/smmpanel"
 )
 
@@ -49,7 +50,17 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/webhook/megapay", megapayHandler(store, wiz, tg, webhookSecret))
+	redisAddr := os.Getenv("REDIS_ADDR")
+	if redisAddr == "" {
+		redisAddr = "127.0.0.1:6379"
+	}
+	maxConcurrent, _ := strconv.Atoi(os.Getenv("QUEUE_MAX_CONCURRENT"))
+	if maxConcurrent == 0 {
+		maxConcurrent = 5
+	}
+	q := queue.New(redisAddr, maxConcurrent)
+
+	mux.HandleFunc("/webhook/megapay", megapayHandler(store, wiz, tg, q, webhookSecret))
 
 	mux.HandleFunc("/api/packages", packagesHandler())
 	mux.HandleFunc("/api/orders", ordersHandler(store, pay))
@@ -300,7 +311,7 @@ type megapayPayload struct {
 	Signature string  `json:"signature"`
 }
 
-func megapayHandler(store *db.Store, wiz *smmpanel.Client, tg *tgNotifier, secret string) http.HandlerFunc {
+func megapayHandler(store *db.Store, wiz *smmpanel.Client, tg *tgNotifier, q *queue.Queue, secret string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -342,14 +353,14 @@ func megapayHandler(store *db.Store, wiz *smmpanel.Client, tg *tgNotifier, secre
 			return
 		}
 
-		go autoFulfill(context.Background(), store, wiz, tg, payload.OrderID, payload.MpesaRef)
+		go autoFulfill(context.Background(), store, wiz, tg, q, payload.OrderID, payload.MpesaRef)
 
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintln(w, "ok")
 	}
 }
 
-func autoFulfill(ctx context.Context, store *db.Store, wiz *smmpanel.Client, tg *tgNotifier, orderID int64, mpesaRef string) {
+func autoFulfill(ctx context.Context, store *db.Store, wiz *smmpanel.Client, tg *tgNotifier, q *queue.Queue, orderID int64, mpesaRef string) {
 	order, err := store.GetOrder(ctx, orderID)
 	if err != nil {
 		log.Printf("autoFulfill getOrder %d: %v", orderID, err)
@@ -363,7 +374,7 @@ func autoFulfill(ctx context.Context, store *db.Store, wiz *smmpanel.Client, tg 
 		tg.sendClient(clientTgID, fmt.Sprintf(
 			"✅ *Payment Confirmed!*\n\n"+
 				"M-Pesa payment received for *%s* (KES %d).\n\n"+
-				"🚀 Your boost is being placed right now — followers will start arriving shortly.\n\n"+
+				"🚀 Your boost is queued for delivery — followers will start arriving shortly.\n\n"+
 				"_Order #%d · Ref: %s_",
 			pkg.Name, order.TotalKES, orderID, mpesaRef,
 		))
@@ -380,30 +391,19 @@ func autoFulfill(ctx context.Context, store *db.Store, wiz *smmpanel.Client, tg 
 			"🔗 %s\n"+
 			"👤 Client TG: `%d`\n"+
 			"🕐 %s\n\n"+
-			"⚡ Auto-fulfillment started…",
+			"⏳ Queued for fulfillment…",
 		orderID, pkg.Name, order.TotalKES, mpesaRef,
 		profileDisplay, clientTgID,
 		time.Now().Format("02 Jan 15:04 MST"),
 	), nil)
 
-	sendText := func(chatID int64, text string) { tg.sendClient(chatID, text) }
-	bot.FulfillOrder(ctx, store, wiz, sendText, nil, orderID)
-
-	if clientTgID > 0 {
-		if refreshed, err := store.GetOrder(ctx, orderID); err == nil {
-			if string(refreshed.Status) == "processing" {
-				tg.sendClient(clientTgID, fmt.Sprintf(
-					"🚀 *Your InnBoost has started!*\n\n"+
-						"Order #%d (*%s*) is now live on our delivery system.\n\n"+
-						"📈 Followers will start arriving shortly and continue drip-feeding at a safe, organic pace.\n\n"+
-						"_Keep your profile public during delivery. DM @innbuckshelp if you have questions._",
-					orderID, pkg.Name,
-				))
-			}
-		}
+	if err := q.Push(ctx, orderID); err != nil {
+		log.Printf("order %d: queue push failed (%v) — fulfilling directly", orderID, err)
+		sendText := func(chatID int64, text string) { tg.sendClient(chatID, text) }
+		bot.FulfillOrder(ctx, store, wiz, sendText, nil, orderID)
+	} else {
+		log.Printf("order %d queued for fulfillment", orderID)
 	}
-
-	log.Printf("order %d auto-fulfilled via megapay webhook", orderID)
 }
 
 // ── Telegram notifier (lightweight — no library, just HTTP) ──────────────────

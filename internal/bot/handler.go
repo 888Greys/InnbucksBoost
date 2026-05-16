@@ -98,6 +98,47 @@ func (b *Bot) handleUpdate(ctx context.Context, update tgbotapi.Update) {
 	case msg.Text == "/stats" && b.isAdmin(msg.From.ID):
 		b.sendStats(ctx, chatID)
 
+	case msg.Text == "/pause" && b.isAdmin(msg.From.ID):
+		if b.queue == nil {
+			b.sendText(chatID, "⚠️ Queue not configured.")
+			return
+		}
+		if err := b.queue.Pause(ctx); err != nil {
+			b.sendText(chatID, fmt.Sprintf("⚠️ Pause failed: %v", err))
+		} else {
+			b.sendText(chatID, "⏸ *Queue paused.* Incoming orders will hold — users see nothing different.")
+		}
+
+	case msg.Text == "/resume" && b.isAdmin(msg.From.ID):
+		if b.queue == nil {
+			b.sendText(chatID, "⚠️ Queue not configured.")
+			return
+		}
+		if err := b.queue.Resume(ctx); err != nil {
+			b.sendText(chatID, fmt.Sprintf("⚠️ Resume failed: %v", err))
+		} else {
+			b.sendText(chatID, "▶️ *Queue resumed.* Orders will start processing.")
+		}
+
+	case msg.Text == "/queuestat" && b.isAdmin(msg.From.ID):
+		if b.queue == nil {
+			b.sendText(chatID, "⚠️ Queue not configured.")
+			return
+		}
+		depth, active, paused, err := b.queue.Stats(ctx)
+		if err != nil {
+			b.sendText(chatID, fmt.Sprintf("⚠️ Queue error: %v", err))
+			return
+		}
+		status := "▶️ Running"
+		if paused {
+			status = "⏸ Paused"
+		}
+		b.sendText(chatID, fmt.Sprintf(
+			"📊 *Queue Status*\n\nStatus: %s\n📥 Waiting: *%d* orders\n⚡ In-flight to SMMWiz: *%d*",
+			status, depth, active,
+		))
+
 	case sess.Step == "awaiting_link":
 		b.handleLinkSubmission(ctx, chatID, msg.From.ID, msg.Text, sess)
 
