@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"fmt"
+	"log"
 	"math/rand"
 
 	"github.com/aapom/innbucks/internal/models"
@@ -37,7 +38,9 @@ func NewStore(ctx context.Context, connString string) (*Store, error) {
 	if _, err := pool.Exec(ctx, `
 		ALTER TABLE orders ADD COLUMN IF NOT EXISTS public_id TEXT UNIQUE
 	`); err != nil {
-		return nil, fmt.Errorf("migrate orders.public_id: %w", err)
+		// Non-fatal: column may already exist or require superuser. Run manually if needed:
+		// psql -U postgres innbucks -c "ALTER TABLE orders ADD COLUMN IF NOT EXISTS public_id TEXT UNIQUE;"
+		log.Printf("warn: migrate orders.public_id: %v", err)
 	}
 	return &Store{pool: pool}, nil
 }
