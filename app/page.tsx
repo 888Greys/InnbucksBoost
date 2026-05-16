@@ -37,21 +37,6 @@ const PLATFORMS: Platform[] = [
 
 const TIERS = [
   {
-    id: "5ksh-test",
-    name: "5-Bob Test",
-    badge: "🧪 Dev Only",
-    price: "KES 5",
-    usd: "≈ $0.04",
-    note: "Internal test — remove before launch",
-    cardClass: "border-red-500/50 bg-gray-800",
-    headerClass: "bg-gray-800 border-b border-red-500/30",
-    nameClass: "text-red-400",
-    priceClass: "text-white",
-    noteClass: "text-red-400/60",
-    btn: "bg-red-600 hover:bg-red-700 text-white",
-    badgeBg: "bg-red-500 text-white",
-  },
-  {
     id: "test-drive",
     name: "Test Drive",
     badge: null,
@@ -220,12 +205,6 @@ const TIER_EXTRAS: Record<string, string[]> = {
 function buildDynamicFeatures(packages: ApiPackage[]): typeof PLATFORM_FEATURES {
   const result: typeof PLATFORM_FEATURES = {};
   for (const pkg of packages) {
-    // Temporary KES 5 test package
-    if (pkg.id === "tiktok_test_5ksh") {
-      if (!result["tiktok"]) result["tiktok"] = {};
-      result["tiktok"]["5ksh-test"] = { packageId: pkg.id, mtpId: 0, qty: 0, delivers: ["50 TikTok Followers", "Instant Delivery", "Test Only"] };
-      continue;
-    }
     if (!pkg.id.includes("_web_")) continue;
     const suffix = pkg.id.replace(`${pkg.platform}_web_`, "");
     const tierId = TIER_SUFFIX_MAP[suffix];
@@ -287,6 +266,7 @@ const STATUS_META: Record<string, { emoji: string; label: string; color: string 
 
 type OrderStatus = {
   order_id: number;
+  public_id: string;
   status: string;
   package_name: string;
   platform: string;
@@ -344,7 +324,7 @@ function OrderTracker({ apiBase }: { apiBase: string }) {
             <span className="text-3xl">{meta.emoji}</span>
             <div>
               <p className={`font-bold text-lg ${meta.color}`}>{meta.label}</p>
-              <p className="text-gray-500 text-xs">Order #{result.order_id}</p>
+              <p className="text-gray-500 text-xs font-mono">{result.public_id || `#${result.order_id}`}</p>
             </div>
           </div>
           <div className="space-y-2 text-sm">
@@ -387,7 +367,8 @@ function PaymentModal({ order, platformFeatures, onClose }: { order: Order; plat
   const [profileInput, setProfileInput] = useState("");
   const [stage, setStage] = useState<ModalStage>("form");
   const [errMsg, setErrMsg] = useState("");
-  const [orderId, setOrderId] = useState<number | null>(null);
+  const [orderId, setOrderId] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const [orderStatus, setOrderStatus] = useState("pending");
   const [loading, setLoading] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -400,7 +381,15 @@ function PaymentModal({ order, platformFeatures, onClose }: { order: Order; plat
 
   useEffect(() => () => stopPolling(), []);
 
-  function startPolling(id: number) {
+  function copyOrderId() {
+    if (!orderId) return;
+    navigator.clipboard.writeText(orderId).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
+  function startPolling(id: string) {
     let attempts = 0;
     const MAX = 60;
     let transitioned = false;
@@ -452,9 +441,9 @@ function PaymentModal({ order, platformFeatures, onClose }: { order: Order; plat
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed to send M-Pesa request");
-      setOrderId(data.order_id);
+      setOrderId(data.public_id || String(data.order_id));
       setStage("waiting");
-      startPolling(data.order_id);
+      startPolling(data.public_id || String(data.order_id));
     } catch (err: unknown) {
       setErrMsg(err instanceof Error ? err.message : "Something went wrong. Please retry.");
     } finally {
@@ -585,9 +574,17 @@ function PaymentModal({ order, platformFeatures, onClose }: { order: Order; plat
               </div>
 
               {orderId && (
-                <p className="text-xs text-gray-600 text-center mb-4">
-                  Order <span className="font-mono text-gray-400">#{orderId}</span> · Keep your profile public during delivery
-                </p>
+                <div className="bg-gray-800 border border-white/10 rounded-xl px-4 py-3 mb-4">
+                  <p className="text-xs text-gray-500 mb-1.5">Save your Order ID to track delivery later</p>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-white font-bold tracking-widest flex-1 text-sm">{orderId}</span>
+                    <button onClick={copyOrderId}
+                      className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold transition flex-shrink-0">
+                      {copied ? "Copied!" : "Copy"}
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-600 mt-1.5">Use this ID in the <em>Track Order</em> section to check status anytime.</p>
+                </div>
               )}
 
               <a href="https://t.me/workratew" target="_blank" rel="noopener noreferrer"
