@@ -142,13 +142,18 @@ func (b *Bot) handleCallback(ctx context.Context, cb *tgbotapi.CallbackQuery) {
 		sess.Step = "awaiting_link"
 		b.notifier.NotifyPackageSelected(cb.From.ID, cb.From.UserName, pkg)
 
+		tagline := tierTagline(pkgID)
+		taglineStr := ""
+		if tagline != "" {
+			taglineStr = "\n_" + tagline + "_"
+		}
 		b.sendText(chatID, fmt.Sprintf(
-			"%s *%s*\n\n📦 %s\n💰 Price: *KES %d*\n%s\n\n✏️ *InnBoost — Step 1 of 4*\n\nEnter your %s username:\n\n_Just your handle, e.g._ `yourhandle` _(no @ needed)_\n_Make sure your profile is Public so InnBoost can verify it_",
+			"%s *%s*%s\n\n%s\n\n💰 *KES %d*\n\n✏️ *InnBoost — Step 1 of 4*\n\nEnter your %s username:\n\n_Just your handle, e.g._ `yourhandle` _(no @ needed)_\n_Make sure your profile is Public so InnBoost can verify it_",
 			platformEmoji(string(pkg.Platform)),
 			pkg.Name,
-			pkg.Description,
+			taglineStr,
+			descriptionBullets(pkg),
 			pkg.PriceKES,
-			refillLine(pkg),
 			platformName(string(pkg.Platform)),
 		))
 
@@ -977,4 +982,34 @@ func refillLine(pkg Package) string {
 		return "🔄 30-day refill guarantee"
 	}
 	return ""
+}
+
+func tierTagline(pkgID string) string {
+	switch {
+	case strings.HasSuffix(pkgID, "_test"):
+		return "Try it risk-free — airtime price"
+	case strings.HasSuffix(pkgID, "_starter"):
+		return "Serious growth starts here"
+	case strings.HasSuffix(pkgID, "_legit"):
+		return "Look established, get taken seriously"
+	case strings.HasSuffix(pkgID, "_influencer"):
+		return "Make brands notice you"
+	case strings.HasSuffix(pkgID, "_bazuu"):
+		return "Go Bazuu or go home 🦁"
+	default:
+		return ""
+	}
+}
+
+func descriptionBullets(pkg Package) string {
+	parts := strings.Split(pkg.Description, " + ")
+	var lines []string
+	for _, p := range parts {
+		lines = append(lines, "✅ "+strings.TrimSpace(p))
+	}
+	if pkg.Refillable {
+		lines = append(lines, "🔄 30-Day Refill Guarantee")
+	}
+	lines = append(lines, "⚡ Delivery starts within the hour")
+	return strings.Join(lines, "\n")
 }
