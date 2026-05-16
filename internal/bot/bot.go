@@ -21,6 +21,7 @@ type Store interface {
 	GetClientTelegramID(ctx context.Context, orderID int64) (int64, error)
 	UpdateOrderStatus(ctx context.Context, orderID int64, status models.OrderStatus, wizIDs []int64) error
 	SaveRefill(ctx context.Context, orderID, wizOrderID, wizRefillID int64) error
+	GetClientOrders(ctx context.Context, telegramID int64) ([]*models.Order, error)
 	GetOrCreateReferralCode(ctx context.Context, telegramID int64) (string, error)
 	GetCreditBalance(ctx context.Context, telegramID int64) (int, error)
 	GetStats(ctx context.Context) (*models.DailyStats, error)

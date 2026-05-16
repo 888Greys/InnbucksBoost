@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/aapom/innbucks/internal/models"
 	"github.com/aapom/innbucks/internal/profile"
 )
 
@@ -78,7 +79,31 @@ func (b *Bot) handleUpdate(ctx context.Context, update tgbotapi.Update) {
 		sess.Step = ""
 
 	case msg.Text == "📦 My Orders":
-		b.sendText(chatID, "📦 *My Orders*\n\nNo active orders yet.\n\nTap 🛍 *Shop* to place your first order.")
+		orders, err := b.store.GetClientOrders(ctx, chatID)
+		if err != nil || len(orders) == 0 {
+			b.sendText(chatID, "📦 *My Orders*\n\nNo active orders yet.\n\nTap 🛍 *Shop* to place your first order.")
+			return
+		}
+		text := "📦 *My Orders*\n\n"
+		statusEmoji := map[models.OrderStatus]string{
+			models.StatusPending:    "⏳",
+			models.StatusProcessing: "🚀",
+			models.StatusCompleted:  "✅",
+			models.StatusPartial:    "⚠️",
+		}
+		for _, o := range orders {
+			pkg, _ := GetPackage(o.PackageID)
+			emoji := statusEmoji[o.Status]
+			if emoji == "" {
+				emoji = "📋"
+			}
+			text += fmt.Sprintf("%s *Order #%d* — %s\n_%s · KES %d · %s_\n\n",
+				emoji, o.ID, pkg.Name,
+				string(o.Status), o.TotalKES,
+				o.CreatedAt.Format("02 Jan 15:04"),
+			)
+		}
+		b.sendText(chatID, text)
 
 	case msg.Text == "❓ How it Works":
 		b.sendHowItWorks(chatID)

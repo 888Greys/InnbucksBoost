@@ -179,6 +179,32 @@ func (s *Store) GetClientTelegramID(ctx context.Context, orderID int64) (int64, 
 	return tgID, err
 }
 
+func (s *Store) GetClientOrders(ctx context.Context, telegramID int64) ([]*models.Order, error) {
+	rows, err := s.pool.Query(ctx, `
+		SELECT o.id, o.package_id, o.profile_link, o.total_kes, o.status, o.wiz_order_ids, o.created_at, o.updated_at
+		FROM orders o
+		JOIN clients c ON c.id = o.client_id
+		WHERE c.telegram_id = $1
+		  AND o.status NOT IN ('cancelled', 'failed')
+		ORDER BY o.created_at DESC
+		LIMIT 10
+	`, telegramID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var orders []*models.Order
+	for rows.Next() {
+		o := &models.Order{}
+		if err := rows.Scan(&o.ID, &o.PackageID, &o.ProfileLink, &o.TotalKES, &o.Status, &o.WizOrderIDs, &o.CreatedAt, &o.UpdatedAt); err != nil {
+			return nil, err
+		}
+		orders = append(orders, o)
+	}
+	return orders, rows.Err()
+}
+
 type PendingSTKTransaction struct {
 	OrderID      int64
 	STKRequestID string
