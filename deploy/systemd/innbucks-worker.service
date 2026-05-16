@@ -1,0 +1,18 @@
+[Unit]
+Description=InnBoost Background Worker
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=innbucks
+WorkingDirectory=/opt/innbucks
+EnvironmentFile=/opt/innbucks/.env
+ExecStart=/opt/innbucks/bin/worker
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,18 @@
+[Unit]
+Description=InnBoost API Server
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=innbucks
+WorkingDirectory=/opt/innbucks
+EnvironmentFile=/opt/innbucks/.env
+ExecStart=/opt/innbucks/bin/server
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
