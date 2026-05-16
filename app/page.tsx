@@ -186,11 +186,42 @@ const FAQS = [
 
 // ─── Carousel data (Legit Profile highlight across all platforms) ──────────────
 
-const CAROUSEL_SLIDES = PLATFORMS.map(p => ({
-  platform: p,
-  tier: TIERS.find(t => t.id === "legit")!,
-  features: PLATFORM_FEATURES[p.id]["legit"],
-}));
+// ─── API types + dynamic feature builder ─────────────────────────────────────
+
+type ApiPackage = { id: string; name: string; platform: string; price_kes: number; description: string };
+
+const TIER_SUFFIX_MAP: Record<string, string> = {
+  test: "test-drive", starter: "starter", legit: "legit", influencer: "influencer", bazuu: "bazuu",
+};
+
+const TIER_EXTRAS: Record<string, string[]> = {
+  "test-drive":  ["Algorithm-Safe", "Delivery starts in minutes"],
+  "starter":     ["30-Day Refill", "Delivery in 6–12 hrs"],
+  "legit":       ["30-Day Refill", "Priority Delivery"],
+  "influencer":  ["60-Day Refill", "Express Delivery", "WhatsApp Support"],
+  "bazuu":       ["90-Day Refill", "VIP Express Delivery", "Dedicated Agent"],
+};
+
+function buildDynamicFeatures(packages: ApiPackage[]): typeof PLATFORM_FEATURES {
+  const result: typeof PLATFORM_FEATURES = {};
+  for (const pkg of packages) {
+    if (!pkg.id.includes("_web_")) continue;
+    const suffix = pkg.id.replace(`${pkg.platform}_web_`, "");
+    const tierId = TIER_SUFFIX_MAP[suffix];
+    if (!tierId) continue;
+    if (!result[pkg.platform]) result[pkg.platform] = {};
+    result[pkg.platform][tierId] = {
+      packageId: pkg.id,
+      mtpId: 0,
+      qty: 0,
+      delivers: [
+        ...pkg.description.split(" + ").map(s => s.trim()),
+        ...(TIER_EXTRAS[tierId] ?? []),
+      ],
+    };
+  }
+  return result;
+}
 
 // ─── Payment Modal ────────────────────────────────────────────────────────────
 
@@ -222,7 +253,7 @@ function normalizeProfileUrl(platformId: string, input: string): string {
   return (bases[platformId] ?? "https://") + v;
 }
 
-function PaymentModal({ order, onClose }: { order: Order; onClose: () => void }) {
+function PaymentModal({ order, platformFeatures, onClose }: { order: Order; platformFeatures: typeof PLATFORM_FEATURES; onClose: () => void }) {
   const [phone, setPhone] = useState("");
   const [profileInput, setProfileInput] = useState("");
   const [stage, setStage] = useState<ModalStage>("form");
@@ -232,7 +263,7 @@ function PaymentModal({ order, onClose }: { order: Order; onClose: () => void })
   const [loading, setLoading] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const { tier, platform } = order;
-  const features = PLATFORM_FEATURES[platform.id][tier.id];
+  const features = platformFeatures[platform.id]?.[tier.id] ?? PLATFORM_FEATURES[platform.id][tier.id];
 
   function stopPolling() {
     if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
@@ -465,12 +496,13 @@ function PaymentModal({ order, onClose }: { order: Order; onClose: () => void })
 
 // ─── Pricing Card ─────────────────────────────────────────────────────────────
 
-function PricingCard({ tier, platformId, onSelect }: {
+function PricingCard({ tier, platformId, platformFeatures, onSelect }: {
   tier: typeof TIERS[number];
   platformId: string;
+  platformFeatures: typeof PLATFORM_FEATURES;
   onSelect: () => void;
 }) {
-  const features = PLATFORM_FEATURES[platformId][tier.id];
+  const features = platformFeatures[platformId]?.[tier.id] ?? PLATFORM_FEATURES[platformId][tier.id];
   const isBazuu = tier.id === "bazuu";
 
   return (
@@ -511,7 +543,7 @@ function PricingCard({ tier, platformId, onSelect }: {
 
 // ─── Packages Carousel ────────────────────────────────────────────────────────
 
-function PackagesCarousel({ onOrder }: { onOrder: (order: Order) => void }) {
+function PackagesCarousel({ onOrder, slides }: { onOrder: (order: Order) => void; slides: { platform: Platform; tier: typeof TIERS[number]; features: typeof PLATFORM_FEATURES[string][string] }[] }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(true);
@@ -547,7 +579,7 @@ function PackagesCarousel({ onOrder }: { onOrder: (order: Order) => void }) {
         onScroll={updateArrows}
         className="flex gap-4 overflow-x-auto scroll-smooth pb-2 px-2"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
-        {CAROUSEL_SLIDES.map(({ platform, tier, features }) => (
+        {slides.map(({ platform, tier, features }) => (
           <div key={platform.id}
             className="flex-shrink-0 w-64 rounded-2xl border border-white/10 bg-gray-800 overflow-hidden hover:-translate-y-1 transition-transform duration-200">
             {/* Card header */}
@@ -611,11 +643,28 @@ export default function Home() {
   const [activePlatformId, setActivePlatformId] = useState("facebook");
   const [order, setOrder] = useState<Order | null>(null);
   const [showCta, setShowCta] = useState(true);
+  const [platformFeatures, setPlatformFeatures] = useState(PLATFORM_FEATURES);
 
   useEffect(() => {
     const t = setTimeout(() => setShowCta(false), 5000);
     return () => clearTimeout(t);
   }, []);
+
+  useEffect(() => {
+    fetch("/api/packages")
+      .then(r => r.json())
+      .then((pkgs: ApiPackage[]) => {
+        const dynamic = buildDynamicFeatures(pkgs);
+        if (Object.keys(dynamic).length > 0) setPlatformFeatures(dynamic);
+      })
+      .catch(() => {});
+  }, []);
+
+  const carouselSlides = PLATFORMS.map(p => ({
+    platform: p,
+    tier: TIERS.find(t => t.id === "legit")!,
+    features: platformFeatures[p.id]?.["legit"] ?? PLATFORM_FEATURES[p.id]["legit"],
+  }));
 
   function scrollTo(id: string) {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
@@ -804,13 +853,13 @@ export default function Home() {
           {/* Cards: 3 top + 2 bottom */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {TIERS.slice(0, 3).map(tier => (
-              <PricingCard key={tier.id} tier={tier} platformId={activePlatformId}
+              <PricingCard key={tier.id} tier={tier} platformId={activePlatformId} platformFeatures={platformFeatures}
                 onSelect={() => setOrder({ tier, platform: activePlatform })} />
             ))}
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-5 max-w-2xl mx-auto">
             {TIERS.slice(3).map(tier => (
-              <PricingCard key={tier.id} tier={tier} platformId={activePlatformId}
+              <PricingCard key={tier.id} tier={tier} platformId={activePlatformId} platformFeatures={platformFeatures}
                 onSelect={() => setOrder({ tier, platform: activePlatform })} />
             ))}
           </div>
@@ -829,7 +878,7 @@ export default function Home() {
             <h2 className="text-2xl sm:text-3xl font-extrabold text-white mt-2">Most Popular Package</h2>
             <p className="text-gray-500 text-sm mt-1">Legit Profile — KES 1,299 across every platform</p>
           </div>
-          <PackagesCarousel onOrder={setOrder} />
+          <PackagesCarousel onOrder={setOrder} slides={carouselSlides} />
           <p className="text-center text-xs text-gray-600 mt-6">
             Swipe or use arrows to browse all 7 platforms
           </p>
@@ -879,7 +928,7 @@ export default function Home() {
       </div>
 
       {/* ── Payment Modal ── */}
-      {order && <PaymentModal order={order} onClose={() => setOrder(null)} />}
+      {order && <PaymentModal order={order} platformFeatures={platformFeatures} onClose={() => setOrder(null)} />}
     </div>
   );
 }
