@@ -523,8 +523,10 @@ function PricingCard({ tier, platformId, platformFeatures, onSelect }: {
   platformFeatures: typeof PLATFORM_FEATURES;
   onSelect: () => void;
 }) {
-  const features = platformFeatures[platformId]?.[tier.id] ?? PLATFORM_FEATURES[platformId][tier.id];
+  const features = platformFeatures[platformId]?.[tier.id] ?? PLATFORM_FEATURES[platformId]?.[tier.id];
   const isBazuu = tier.id === "bazuu";
+
+  if (!features) return null;
 
   return (
     <div className={`relative flex flex-col rounded-2xl border-2 overflow-hidden transition-all duration-200 hover:-translate-y-1 ${tier.cardClass}`}>
