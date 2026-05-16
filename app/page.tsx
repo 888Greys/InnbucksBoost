@@ -115,56 +115,56 @@ const TIERS = [
 
 // ─── Per-platform delivery ────────────────────────────────────────────────────
 
-type TierFeatures = { [tierId: string]: { mtpId: number; qty: number; delivers: string[] } };
+type TierFeatures = { [tierId: string]: { packageId: string; mtpId: number; qty: number; delivers: string[] } };
 const PLATFORM_FEATURES: { [platform: string]: TierFeatures } = {
   facebook: {
-    "test-drive":  { mtpId: 9061, qty: 1000,  delivers: ["1,000 Page Followers", "200 Post Likes", "30-Day Refill", "Delivery starts in minutes"] },
-    "starter":     { mtpId: 9061, qty: 3000,  delivers: ["3,000 Page Followers", "500 Post Likes", "30-Day Refill", "Delivery in 6–12 hrs"] },
-    "legit":       { mtpId: 9061, qty: 6000,  delivers: ["6,000 Page Followers", "1,000 Post Likes", "60-Day Refill", "Priority Delivery 6–12 hrs", "Free Page Audit"] },
-    "influencer":  { mtpId: 5798, qty: 12000, delivers: ["12,000 Page Followers", "2,000 Post Likes", "60-Day Refill", "Express Delivery 3–6 hrs", "WhatsApp Support"] },
-    "bazuu":       { mtpId: 5798, qty: 25000, delivers: ["25,000 Page Followers", "5,000 Post Likes", "90-Day Refill", "VIP Express Delivery", "Dedicated Agent", "Strategy Call"] },
+    "test-drive":  { packageId: "facebook_web_test",        mtpId: 9061, qty: 1000,  delivers: ["1,000 Page Followers", "200 Post Likes", "30-Day Refill", "Delivery starts in minutes"] },
+    "starter":     { packageId: "facebook_web_starter",     mtpId: 9061, qty: 3000,  delivers: ["3,000 Page Followers", "500 Post Likes", "30-Day Refill", "Delivery in 6–12 hrs"] },
+    "legit":       { packageId: "facebook_web_legit",       mtpId: 9061, qty: 6000,  delivers: ["6,000 Page Followers", "1,000 Post Likes", "60-Day Refill", "Priority Delivery 6–12 hrs", "Free Page Audit"] },
+    "influencer":  { packageId: "facebook_web_influencer",  mtpId: 5798, qty: 12000, delivers: ["12,000 Page Followers", "2,000 Post Likes", "60-Day Refill", "Express Delivery 3–6 hrs", "WhatsApp Support"] },
+    "bazuu":       { packageId: "facebook_web_bazuu",       mtpId: 5798, qty: 25000, delivers: ["25,000 Page Followers", "5,000 Post Likes", "90-Day Refill", "VIP Express Delivery", "Dedicated Agent", "Strategy Call"] },
   },
   instagram: {
-    "test-drive":  { mtpId: 7403, qty: 10000,  delivers: ["10,000 Reel Views", "200 Followers", "200 Post Likes", "Lifetime Guaranteed", "Delivery starts in minutes"] },
-    "starter":     { mtpId: 7403, qty: 40000,  delivers: ["40,000 Reel Views", "600 Followers", "500 Post Likes", "Lifetime Guaranteed", "Delivery in 6–12 hrs"] },
-    "legit":       { mtpId: 7403, qty: 100000, delivers: ["100,000 Reel Views", "1,500 Followers", "1,000 Post Likes", "Lifetime Guaranteed", "Priority Delivery", "Hashtag Tips"] },
-    "influencer":  { mtpId: 7403, qty: 250000, delivers: ["250,000 Reel Views", "4,000 Followers", "2,500 Post Likes", "Lifetime Guaranteed", "Express Delivery", "WhatsApp Support"] },
-    "bazuu":       { mtpId: 7403, qty: 600000, delivers: ["600,000 Reel Views", "10,000 Followers", "6,000 Post Likes", "Lifetime Guaranteed", "VIP Delivery", "Dedicated Agent"] },
+    "test-drive":  { packageId: "instagram_web_test",       mtpId: 7403, qty: 10000,  delivers: ["10,000 Reel Views", "200 Followers", "200 Post Likes", "Lifetime Guaranteed", "Delivery starts in minutes"] },
+    "starter":     { packageId: "instagram_web_starter",    mtpId: 7403, qty: 40000,  delivers: ["40,000 Reel Views", "600 Followers", "500 Post Likes", "Lifetime Guaranteed", "Delivery in 6–12 hrs"] },
+    "legit":       { packageId: "instagram_web_legit",      mtpId: 7403, qty: 100000, delivers: ["100,000 Reel Views", "1,500 Followers", "1,000 Post Likes", "Lifetime Guaranteed", "Priority Delivery", "Hashtag Tips"] },
+    "influencer":  { packageId: "instagram_web_influencer", mtpId: 7403, qty: 250000, delivers: ["250,000 Reel Views", "4,000 Followers", "2,500 Post Likes", "Lifetime Guaranteed", "Express Delivery", "WhatsApp Support"] },
+    "bazuu":       { packageId: "instagram_web_bazuu",      mtpId: 7403, qty: 600000, delivers: ["600,000 Reel Views", "10,000 Followers", "6,000 Post Likes", "Lifetime Guaranteed", "VIP Delivery", "Dedicated Agent"] },
   },
   tiktok: {
-    "test-drive":  { mtpId: 4645, qty: 10000,  delivers: ["10,000 Video Views", "200 Followers", "200 Likes", "Algorithm-Safe", "Delivery starts in minutes"] },
-    "starter":     { mtpId: 4645, qty: 40000,  delivers: ["40,000 Video Views", "600 Followers", "600 Likes", "Algorithm-Safe", "Delivery in 6–12 hrs"] },
-    "legit":       { mtpId: 4645, qty: 100000, delivers: ["100,000 Video Views", "1,500 Followers", "1,500 Likes", "Algorithm-Safe", "Priority Delivery", "Content Tips"] },
-    "influencer":  { mtpId: 4645, qty: 300000, delivers: ["300,000 Video Views", "4,000 Followers", "4,000 Likes", "Algorithm-Safe", "Express Delivery", "WhatsApp Support"] },
-    "bazuu":       { mtpId: 4645, qty: 700000, delivers: ["700,000 Video Views", "10,000 Followers", "8,000 Likes", "Algorithm-Safe", "VIP Delivery", "Dedicated Agent"] },
+    "test-drive":  { packageId: "tiktok_web_test",          mtpId: 4645, qty: 10000,  delivers: ["10,000 Video Views", "200 Followers", "200 Likes", "Algorithm-Safe", "Delivery starts in minutes"] },
+    "starter":     { packageId: "tiktok_web_starter",       mtpId: 4645, qty: 40000,  delivers: ["40,000 Video Views", "600 Followers", "600 Likes", "Algorithm-Safe", "Delivery in 6–12 hrs"] },
+    "legit":       { packageId: "tiktok_web_legit",         mtpId: 4645, qty: 100000, delivers: ["100,000 Video Views", "1,500 Followers", "1,500 Likes", "Algorithm-Safe", "Priority Delivery", "Content Tips"] },
+    "influencer":  { packageId: "tiktok_web_influencer",    mtpId: 4645, qty: 300000, delivers: ["300,000 Video Views", "4,000 Followers", "4,000 Likes", "Algorithm-Safe", "Express Delivery", "WhatsApp Support"] },
+    "bazuu":       { packageId: "tiktok_web_bazuu",         mtpId: 4645, qty: 700000, delivers: ["700,000 Video Views", "10,000 Followers", "8,000 Likes", "Algorithm-Safe", "VIP Delivery", "Dedicated Agent"] },
   },
   youtube: {
-    "test-drive":  { mtpId: 7759, qty: 2000,   delivers: ["2,000 Video Views", "100 Subscribers", "100 Likes", "30-Day Refill", "Delivery starts in minutes"] },
-    "starter":     { mtpId: 7759, qty: 8000,   delivers: ["8,000 Video Views", "400 Subscribers", "300 Likes", "30-Day Refill", "Delivery in 6–12 hrs"] },
-    "legit":       { mtpId: 7759, qty: 20000,  delivers: ["20,000 Video Views", "1,000 Subscribers", "700 Likes", "30-Day Refill", "Watch Hours Boost", "Priority Delivery"] },
-    "influencer":  { mtpId: 7759, qty: 50000,  delivers: ["50,000 Video Views", "2,500 Subscribers", "1,500 Likes", "30-Day Refill", "Watch Hours Boost", "WhatsApp Support"] },
-    "bazuu":       { mtpId: 7759, qty: 120000, delivers: ["120,000 Video Views", "6,000 Subscribers", "4,000 Likes", "Lifetime Guaranteed", "Watch Hours Boost", "Dedicated Agent"] },
+    "test-drive":  { packageId: "youtube_web_test",         mtpId: 7759, qty: 2000,   delivers: ["2,000 Video Views", "100 Subscribers", "100 Likes", "30-Day Refill", "Delivery starts in minutes"] },
+    "starter":     { packageId: "youtube_web_starter",      mtpId: 7759, qty: 8000,   delivers: ["8,000 Video Views", "400 Subscribers", "300 Likes", "30-Day Refill", "Delivery in 6–12 hrs"] },
+    "legit":       { packageId: "youtube_web_legit",        mtpId: 7759, qty: 20000,  delivers: ["20,000 Video Views", "1,000 Subscribers", "700 Likes", "30-Day Refill", "Watch Hours Boost", "Priority Delivery"] },
+    "influencer":  { packageId: "youtube_web_influencer",   mtpId: 7759, qty: 50000,  delivers: ["50,000 Video Views", "2,500 Subscribers", "1,500 Likes", "30-Day Refill", "Watch Hours Boost", "WhatsApp Support"] },
+    "bazuu":       { packageId: "youtube_web_bazuu",        mtpId: 7759, qty: 120000, delivers: ["120,000 Video Views", "6,000 Subscribers", "4,000 Likes", "Lifetime Guaranteed", "Watch Hours Boost", "Dedicated Agent"] },
   },
   twitter: {
-    "test-drive":  { mtpId: 9527, qty: 5000,   delivers: ["5,000 Tweet Views", "150 Followers", "150 Likes", "Algorithm-Safe", "Delivery starts in minutes"] },
-    "starter":     { mtpId: 9527, qty: 20000,  delivers: ["20,000 Tweet Views", "500 Followers", "400 Likes", "Algorithm-Safe", "Delivery in 6–12 hrs"] },
-    "legit":       { mtpId: 9527, qty: 60000,  delivers: ["60,000 Tweet Views", "1,500 Followers", "1,000 Likes", "Algorithm-Safe", "Retweet Boost", "Priority Delivery"] },
-    "influencer":  { mtpId: 9527, qty: 150000, delivers: ["150,000 Tweet Views", "4,000 Followers", "2,000 Likes", "Algorithm-Safe", "Retweet Boost", "WhatsApp Support"] },
-    "bazuu":       { mtpId: 9527, qty: 400000, delivers: ["400,000 Tweet Views", "10,000 Followers", "5,000 Likes", "Algorithm-Safe", "VIP Delivery", "Dedicated Agent"] },
+    "test-drive":  { packageId: "twitter_web_test",         mtpId: 9527, qty: 5000,   delivers: ["5,000 Tweet Views", "150 Followers", "150 Likes", "Algorithm-Safe", "Delivery starts in minutes"] },
+    "starter":     { packageId: "twitter_web_starter",      mtpId: 9527, qty: 20000,  delivers: ["20,000 Tweet Views", "500 Followers", "400 Likes", "Algorithm-Safe", "Delivery in 6–12 hrs"] },
+    "legit":       { packageId: "twitter_web_legit",        mtpId: 9527, qty: 60000,  delivers: ["60,000 Tweet Views", "1,500 Followers", "1,000 Likes", "Algorithm-Safe", "Retweet Boost", "Priority Delivery"] },
+    "influencer":  { packageId: "twitter_web_influencer",   mtpId: 9527, qty: 150000, delivers: ["150,000 Tweet Views", "4,000 Followers", "2,000 Likes", "Algorithm-Safe", "Retweet Boost", "WhatsApp Support"] },
+    "bazuu":       { packageId: "twitter_web_bazuu",        mtpId: 9527, qty: 400000, delivers: ["400,000 Tweet Views", "10,000 Followers", "5,000 Likes", "Algorithm-Safe", "VIP Delivery", "Dedicated Agent"] },
   },
   telegram: {
-    "test-drive":  { mtpId: 8136, qty: 500,   delivers: ["500 Channel Members", "3,000 Post Views", "Algorithm-Safe", "Delivery starts in minutes"] },
-    "starter":     { mtpId: 8136, qty: 1500,  delivers: ["1,500 Channel Members", "10,000 Post Views", "Algorithm-Safe", "Delivery in 6–12 hrs"] },
-    "legit":       { mtpId: 8136, qty: 4000,  delivers: ["4,000 Channel Members", "30,000 Post Views", "Algorithm-Safe", "Reactions Boost", "Priority Delivery"] },
-    "influencer":  { mtpId: 8136, qty: 8000,  delivers: ["8,000 Channel Members", "80,000 Post Views", "Algorithm-Safe", "Reactions Boost", "WhatsApp Support"] },
-    "bazuu":       { mtpId: 8136, qty: 20000, delivers: ["20,000 Channel Members", "200,000 Post Views", "Algorithm-Safe", "VIP Delivery", "Dedicated Agent"] },
+    "test-drive":  { packageId: "telegram_web_test",        mtpId: 8136, qty: 500,   delivers: ["500 Channel Members", "3,000 Post Views", "Algorithm-Safe", "Delivery starts in minutes"] },
+    "starter":     { packageId: "telegram_web_starter",     mtpId: 8136, qty: 1500,  delivers: ["1,500 Channel Members", "10,000 Post Views", "Algorithm-Safe", "Delivery in 6–12 hrs"] },
+    "legit":       { packageId: "telegram_web_legit",       mtpId: 8136, qty: 4000,  delivers: ["4,000 Channel Members", "30,000 Post Views", "Algorithm-Safe", "Reactions Boost", "Priority Delivery"] },
+    "influencer":  { packageId: "telegram_web_influencer",  mtpId: 8136, qty: 8000,  delivers: ["8,000 Channel Members", "80,000 Post Views", "Algorithm-Safe", "Reactions Boost", "WhatsApp Support"] },
+    "bazuu":       { packageId: "telegram_web_bazuu",       mtpId: 8136, qty: 20000, delivers: ["20,000 Channel Members", "200,000 Post Views", "Algorithm-Safe", "VIP Delivery", "Dedicated Agent"] },
   },
   spotify: {
-    "test-drive":  { mtpId: 3541, qty: 5000,   delivers: ["5,000 Plays", "100 Followers", "Lifetime Guaranteed", "Global Listeners", "Delivery starts in minutes"] },
-    "starter":     { mtpId: 3541, qty: 20000,  delivers: ["20,000 Plays", "300 Followers", "Lifetime Guaranteed", "Global Listeners", "Delivery in 6–12 hrs"] },
-    "legit":       { mtpId: 3541, qty: 60000,  delivers: ["60,000 Plays", "800 Followers", "Lifetime Guaranteed", "USA + Global", "Playlist Tips", "Priority Delivery"] },
-    "influencer":  { mtpId: 3541, qty: 150000, delivers: ["150,000 Plays", "2,000 Followers", "Lifetime Guaranteed", "USA + Europe", "Express Delivery", "WhatsApp Support"] },
-    "bazuu":       { mtpId: 3541, qty: 400000, delivers: ["400,000 Plays", "5,000 Followers", "Lifetime Guaranteed", "USA + Europe + Africa", "VIP Delivery", "Dedicated Agent"] },
+    "test-drive":  { packageId: "spotify_web_test",         mtpId: 3541, qty: 5000,   delivers: ["5,000 Plays", "100 Followers", "Lifetime Guaranteed", "Global Listeners", "Delivery starts in minutes"] },
+    "starter":     { packageId: "spotify_web_starter",      mtpId: 3541, qty: 20000,  delivers: ["20,000 Plays", "300 Followers", "Lifetime Guaranteed", "Global Listeners", "Delivery in 6–12 hrs"] },
+    "legit":       { packageId: "spotify_web_legit",        mtpId: 3541, qty: 60000,  delivers: ["60,000 Plays", "800 Followers", "Lifetime Guaranteed", "USA + Global", "Playlist Tips", "Priority Delivery"] },
+    "influencer":  { packageId: "spotify_web_influencer",   mtpId: 3541, qty: 150000, delivers: ["150,000 Plays", "2,000 Followers", "Lifetime Guaranteed", "USA + Europe", "Express Delivery", "WhatsApp Support"] },
+    "bazuu":       { packageId: "spotify_web_bazuu",        mtpId: 3541, qty: 400000, delivers: ["400,000 Plays", "5,000 Followers", "Lifetime Guaranteed", "USA + Europe + Africa", "VIP Delivery", "Dedicated Agent"] },
   },
 };
 
@@ -195,31 +195,44 @@ const CAROUSEL_SLIDES = PLATFORMS.map(p => ({
 // ─── Payment Modal ────────────────────────────────────────────────────────────
 
 type Order = { tier: typeof TIERS[number]; platform: Platform };
-type ModalStage = "form" | "waiting" | "success" | "error";
+type ModalStage = "form" | "waiting" | "tracking" | "error";
 
 const URL_PLACEHOLDERS: Record<string, string> = {
-  facebook:  "https://facebook.com/yourpage",
-  instagram: "https://instagram.com/yourprofile",
-  tiktok:    "https://tiktok.com/@yourusername",
-  youtube:   "https://youtube.com/@yourchannel",
-  twitter:   "https://x.com/yourusername",
-  telegram:  "https://t.me/yourchannel",
-  spotify:   "https://open.spotify.com/artist/...",
+  facebook:  "@yourpage or facebook.com/yourpage",
+  instagram: "@yourprofile or instagram.com/yourprofile",
+  tiktok:    "@yourusername or tiktok.com/@yourusername",
+  youtube:   "@yourchannel or youtube.com/@yourchannel",
+  twitter:   "@yourusername or x.com/yourusername",
+  telegram:  "@yourchannel or t.me/yourchannel",
+  spotify:   "artist ID or open.spotify.com/artist/...",
 };
+
+function normalizeProfileUrl(platformId: string, input: string): string {
+  const v = input.trim().replace(/^@/, "");
+  if (/^https?:\/\//i.test(v)) return v;
+  const bases: Record<string, string> = {
+    facebook:  "https://facebook.com/",
+    instagram: "https://instagram.com/",
+    tiktok:    "https://tiktok.com/@",
+    youtube:   "https://youtube.com/@",
+    twitter:   "https://x.com/",
+    telegram:  "https://t.me/",
+    spotify:   "https://open.spotify.com/artist/",
+  };
+  return (bases[platformId] ?? "https://") + v;
+}
 
 function PaymentModal({ order, onClose }: { order: Order; onClose: () => void }) {
   const [phone, setPhone] = useState("");
-  const [url, setUrl] = useState("");
+  const [profileInput, setProfileInput] = useState("");
   const [stage, setStage] = useState<ModalStage>("form");
   const [errMsg, setErrMsg] = useState("");
-  const [receipt, setReceipt] = useState("");
+  const [orderId, setOrderId] = useState<number | null>(null);
+  const [orderStatus, setOrderStatus] = useState("pending");
   const [loading, setLoading] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const { tier, platform } = order;
   const features = PLATFORM_FEATURES[platform.id][tier.id];
-
-  // Price as integer KES (strip comma)
-  const amountKes = parseInt(tier.price.replace(/[^0-9]/g, ""), 10);
 
   function stopPolling() {
     if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
@@ -227,60 +240,79 @@ function PaymentModal({ order, onClose }: { order: Order; onClose: () => void })
 
   useEffect(() => () => stopPolling(), []);
 
-  async function startPolling(stkId: string) {
+  function startPolling(id: number) {
     let attempts = 0;
-    const MAX = 60; // 5 minutes at 5 s intervals
+    const MAX = 60;
+    let transitioned = false;
 
     pollRef.current = setInterval(async () => {
       attempts++;
       try {
-        const res = await fetch(`/api/status?id=${encodeURIComponent(stkId)}`);
+        const res = await fetch(`/api/orders/${id}`);
         const data = await res.json();
+        const status: string = data.status ?? "pending";
+        setOrderStatus(status);
 
-        if (data.TransactionStatus === "Completed" && data.TransactionCode === "0") {
+        if (!transitioned && ["processing", "completed", "partial"].includes(status)) {
+          transitioned = true;
+          setStage("tracking");
+        }
+        if (status === "completed" || status === "failed" || status === "cancelled") {
           stopPolling();
-          setReceipt(data.TransactionReceipt ?? "");
-          // Place MTP order
-          await fetch("/api/fulfill", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ service_id: features.mtpId, quantity: features.qty, link: url }),
-          });
-          setStage("success");
-        } else if (data.TransactionStatus === "Cancelled" || data.ResultCode === "1032") {
-          stopPolling();
-          setErrMsg("Payment was cancelled. Please try again.");
-          setStage("error");
-        } else if (attempts >= MAX) {
-          stopPolling();
-          setErrMsg("Payment is taking longer than expected. If you entered your PIN, WhatsApp us and we'll confirm manually.");
-          setStage("error");
+          if (status === "failed" || status === "cancelled") {
+            setErrMsg("Order failed. Please contact support on WhatsApp.");
+            setStage("error");
+          }
         }
       } catch {
         // network blip — keep polling
+      }
+      if (attempts >= MAX && !transitioned) {
+        stopPolling();
+        setErrMsg("Payment not confirmed in time. If you entered your PIN, WhatsApp us and we'll confirm manually.");
+        setStage("error");
       }
     }, 5000);
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!profileInput.trim()) {
+      setErrMsg("Please enter your profile username or URL.");
+      return;
+    }
     setLoading(true);
     setErrMsg("");
+    const profileLink = normalizeProfileUrl(platform.id, profileInput);
     try {
-      const res = await fetch("/api/order", {
+      const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone, amount: amountKes, reference: `InnBucks ${platform.label} ${tier.name}` }),
+        body: JSON.stringify({ package_id: features.packageId, profile_link: profileLink, phone }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Failed to send STK push");
+      if (!res.ok) throw new Error(data.error ?? "Failed to send M-Pesa request");
+      setOrderId(data.order_id);
       setStage("waiting");
-      startPolling(data.stk_request_id);
+      startPolling(data.order_id);
     } catch (err: unknown) {
       setErrMsg(err instanceof Error ? err.message : "Something went wrong. Please retry.");
     } finally {
       setLoading(false);
     }
+  }
+
+  const trackingSteps = [
+    { key: "processing", label: "Payment Received & Order Placed", icon: "✅" },
+    { key: "delivering", label: "Boost Being Delivered", icon: "🚀" },
+    { key: "completed",  label: "Delivery Complete",    icon: "🎉" },
+  ];
+
+  function stepDone(stepKey: string) {
+    if (stepKey === "processing") return ["processing", "partial", "completed"].includes(orderStatus);
+    if (stepKey === "delivering") return ["partial", "completed"].includes(orderStatus);
+    if (stepKey === "completed")  return orderStatus === "completed";
+    return false;
   }
 
   return (
@@ -310,11 +342,12 @@ function PaymentModal({ order, onClose }: { order: Order; onClose: () => void })
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label htmlFor="pf-url" className="block text-sm font-semibold text-gray-300 mb-1">
-                    Your {platform.label} Profile / Page URL
+                    Your {platform.label} Username or Profile URL
                   </label>
-                  <input id="pf-url" type="url" required placeholder={URL_PLACEHOLDERS[platform.id]}
-                    value={url} onChange={e => setUrl(e.target.value)}
+                  <input id="pf-url" type="text" required placeholder={URL_PLACEHOLDERS[platform.id]}
+                    value={profileInput} onChange={e => setProfileInput(e.target.value)}
                     className="w-full border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-800 text-white placeholder-gray-500" />
+                  <p className="text-xs text-gray-600 mt-1">You can enter just your username — we&apos;ll build the full URL.</p>
                 </div>
                 <div>
                   <label htmlFor="phone" className="block text-sm font-semibold text-gray-300 mb-1">
@@ -340,8 +373,8 @@ function PaymentModal({ order, onClose }: { order: Order; onClose: () => void })
           {stage === "waiting" && (
             <div className="text-center py-8">
               <div className="relative w-16 h-16 mx-auto mb-6">
-                <div className="absolute inset-0 rounded-full border-4 border-blue-600/30" />
-                <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-t-transparent animate-spin" />
+                <div className="absolute inset-0 rounded-full border-4 border-green-600/30" />
+                <div className="absolute inset-0 rounded-full border-4 border-green-500 border-t-transparent animate-spin" />
                 <span className="absolute inset-0 flex items-center justify-center text-2xl">📱</span>
               </div>
               <h3 className="text-xl font-bold text-white mb-2">Check Your Phone</h3>
@@ -349,26 +382,54 @@ function PaymentModal({ order, onClose }: { order: Order; onClose: () => void })
                 An M-Pesa STK push was sent to <strong className="text-white">{phone}</strong>.
                 <br />Enter your PIN to confirm payment.
               </p>
-              <div className="mt-6 bg-gray-800 rounded-xl px-4 py-3 text-xs text-gray-500">
-                Waiting for confirmation… this page will update automatically.
+              <div className="mt-6 bg-gray-800 rounded-xl px-4 py-4">
+                <div className="flex items-center justify-center gap-2 mb-1">
+                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                  <span className="text-white text-sm font-semibold">Confirming your payment…</span>
+                </div>
+                <p className="text-xs text-gray-500">Please wait. This page updates automatically — do not close it.</p>
               </div>
             </div>
           )}
 
-          {/* ── SUCCESS ── */}
-          {stage === "success" && (
-            <div className="text-center py-6">
-              <div className="text-5xl mb-4">🎉</div>
-              <h3 className="text-xl font-bold text-white mb-2">Payment Confirmed!</h3>
-              <p className="text-gray-400 text-sm leading-relaxed mb-1">
-                Your {platform.label} boost is now being processed.
-              </p>
-              {receipt && (
-                <p className="text-xs text-gray-500 mb-4">M-Pesa Ref: <span className="text-green-400 font-mono">{receipt}</span></p>
+          {/* ── TRACKING ── */}
+          {stage === "tracking" && (
+            <div className="py-4">
+              <div className="text-center mb-6">
+                <div className="text-4xl mb-3">{orderStatus === "completed" ? "🎉" : "🚀"}</div>
+                <h3 className="text-xl font-bold text-white mb-1">
+                  {orderStatus === "completed" ? "Boost Delivered!" : "Payment Confirmed!"}
+                </h3>
+                <p className="text-gray-400 text-sm">
+                  {orderStatus === "completed"
+                    ? `Your ${platform.label} boost has been fully delivered.`
+                    : `Your ${platform.label} boost is being processed.`}
+                </p>
+              </div>
+
+              {/* Status steps */}
+              <div className="bg-gray-800 rounded-xl p-4 mb-4">
+                <p className="text-xs text-gray-500 uppercase tracking-widest mb-3 font-semibold">Order Progress</p>
+                {trackingSteps.map((step, i) => {
+                  const done = stepDone(step.key);
+                  const active = step.key === "delivering" && orderStatus === "processing";
+                  return (
+                    <div key={step.key} className={`flex items-center gap-3 py-2.5 ${i < trackingSteps.length - 1 ? "border-b border-white/5" : ""}`}>
+                      <span className="text-base w-6 text-center flex-shrink-0">{done ? step.icon : "⏳"}</span>
+                      <span className={`text-sm font-medium flex-1 ${done ? "text-white" : "text-gray-500"}`}>{step.label}</span>
+                      {active && <div className="w-3 h-3 rounded-full border-2 border-blue-400 border-t-transparent animate-spin flex-shrink-0" />}
+                      {done && !active && <FaCheckCircle className="text-green-500 flex-shrink-0" size={14} />}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {orderId && (
+                <p className="text-xs text-gray-600 text-center mb-4">
+                  Order <span className="font-mono text-gray-400">#{orderId}</span> · Keep your profile public during delivery
+                </p>
               )}
-              <p className="text-gray-400 text-sm mb-6">
-                Delivery starts within minutes. WhatsApp us if you have any questions.
-              </p>
+
               <a href="https://wa.me/254700000000" target="_blank" rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-green-600 hover:bg-green-700 text-white font-semibold transition mb-3">
                 <FaWhatsapp size={18} /> WhatsApp Support
