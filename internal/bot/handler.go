@@ -632,7 +632,7 @@ func (b *Bot) handlePhoneSubmission(ctx context.Context, chatID, userID int64, p
 		return
 	}
 
-	orderID, err := b.store.CreatePendingOrder(ctx, userID, pkg.ID, sess.ProfileLink, pkg.PriceKES, sess.ReferralCode)
+	orderID, _, err := b.store.CreatePendingOrder(ctx, userID, pkg.ID, sess.ProfileLink, pkg.PriceKES, sess.ReferralCode)
 	if err != nil {
 		log.Printf("createPendingOrder: %v", err)
 		b.sendText(chatID, "⚠️ Could not create your order. Please try again.")

@@ -13,7 +13,7 @@ import (
 
 type Store interface {
 	UpsertClient(ctx context.Context, telegramID int64) (bool, error)
-	CreatePendingOrder(ctx context.Context, clientTelegramID int64, packageID, link string, amountKES int, referralCode string) (int64, error)
+	CreatePendingOrder(ctx context.Context, clientTelegramID int64, packageID, link string, amountKES int, referralCode string) (int64, string, error)
 	SaveSTKRequest(ctx context.Context, orderID int64, phone, stkRequestID string) error
 	ConfirmTransaction(ctx context.Context, orderID, confirmedBy int64) error
 	CancelOrder(ctx context.Context, orderID int64) error

@@ -60,6 +60,7 @@ type PackageComponent struct {
 
 type Order struct {
 	ID          int64
+	PublicID    string
 	ClientID    int64
 	PackageID   string
 	ProfileLink string

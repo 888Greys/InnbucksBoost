@@ -34,6 +34,11 @@ func NewStore(ctx context.Context, connString string) (*Store, error) {
 	`); err != nil {
 		return nil, fmt.Errorf("migrate bot_sessions: %w", err)
 	}
+	if _, err := pool.Exec(ctx, `
+		ALTER TABLE orders ADD COLUMN IF NOT EXISTS public_id TEXT UNIQUE
+	`); err != nil {
+		return nil, fmt.Errorf("migrate orders.public_id: %w", err)
+	}
 	return &Store{pool: pool}, nil
 }
 
@@ -49,10 +54,10 @@ func (s *Store) UpsertClient(ctx context.Context, telegramID int64) (bool, error
 	return tag.RowsAffected() == 1, err
 }
 
-func (s *Store) CreatePendingOrder(ctx context.Context, clientTelegramID int64, packageID, link string, amountKES int, referralCode string) (int64, error) {
+func (s *Store) CreatePendingOrder(ctx context.Context, clientTelegramID int64, packageID, link string, amountKES int, referralCode string) (int64, string, error) {
 	tx, err := s.pool.Begin(ctx)
 	if err != nil {
-		return 0, err
+		return 0, "", err
 	}
 	defer tx.Rollback(ctx)
 
@@ -63,7 +68,7 @@ func (s *Store) CreatePendingOrder(ctx context.Context, clientTelegramID int64, 
 		RETURNING id
 	`, clientTelegramID).Scan(&clientID)
 	if err != nil {
-		return 0, fmt.Errorf("upsert client: %w", err)
+		return 0, "", fmt.Errorf("upsert client: %w", err)
 	}
 
 	if referralCode != "" {
@@ -74,24 +79,25 @@ func (s *Store) CreatePendingOrder(ctx context.Context, clientTelegramID int64, 
 		`, referralCode, clientID)
 	}
 
+	publicID := generatePublicID()
 	var orderID int64
 	err = tx.QueryRow(ctx, `
-		INSERT INTO orders (client_id, package_id, profile_link, total_kes, status)
-		VALUES ($1, $2, $3, $4, 'pending')
+		INSERT INTO orders (client_id, package_id, profile_link, total_kes, status, public_id)
+		VALUES ($1, $2, $3, $4, 'pending', $5)
 		RETURNING id
-	`, clientID, packageID, link, amountKES).Scan(&orderID)
+	`, clientID, packageID, link, amountKES, publicID).Scan(&orderID)
 	if err != nil {
-		return 0, fmt.Errorf("insert order: %w", err)
+		return 0, "", fmt.Errorf("insert order: %w", err)
 	}
 
 	_, err = tx.Exec(ctx, `
 		INSERT INTO transactions (order_id, amount_kes) VALUES ($1, $2)
 	`, orderID, amountKES)
 	if err != nil {
-		return 0, fmt.Errorf("insert transaction: %w", err)
+		return 0, "", fmt.Errorf("insert transaction: %w", err)
 	}
 
-	return orderID, tx.Commit(ctx)
+	return orderID, publicID, tx.Commit(ctx)
 }
 
 func (s *Store) SaveSTKRequest(ctx context.Context, orderID int64, phone, stkRequestID string) error {
@@ -119,15 +125,30 @@ func (s *Store) CancelOrder(ctx context.Context, orderID int64) error {
 
 func (s *Store) GetOrder(ctx context.Context, orderID int64) (*models.Order, error) {
 	row := s.pool.QueryRow(ctx, `
-		SELECT id, client_id, package_id, profile_link, total_kes, status, wiz_order_ids, created_at, updated_at
+		SELECT id, COALESCE(public_id, ''), client_id, package_id, profile_link, total_kes, status, wiz_order_ids, created_at, updated_at
 		FROM orders WHERE id = $1
 	`, orderID)
 
 	o := &models.Order{}
-	err := row.Scan(&o.ID, &o.ClientID, &o.PackageID, &o.ProfileLink, &o.TotalKES,
+	err := row.Scan(&o.ID, &o.PublicID, &o.ClientID, &o.PackageID, &o.ProfileLink, &o.TotalKES,
 		&o.Status, &o.WizOrderIDs, &o.CreatedAt, &o.UpdatedAt)
 	if err != nil {
 		return nil, fmt.Errorf("get order: %w", err)
+	}
+	return o, nil
+}
+
+func (s *Store) GetOrderByPublicID(ctx context.Context, publicID string) (*models.Order, error) {
+	row := s.pool.QueryRow(ctx, `
+		SELECT id, COALESCE(public_id, ''), client_id, package_id, profile_link, total_kes, status, wiz_order_ids, created_at, updated_at
+		FROM orders WHERE public_id = $1
+	`, publicID)
+
+	o := &models.Order{}
+	err := row.Scan(&o.ID, &o.PublicID, &o.ClientID, &o.PackageID, &o.ProfileLink, &o.TotalKES,
+		&o.Status, &o.WizOrderIDs, &o.CreatedAt, &o.UpdatedAt)
+	if err != nil {
+		return nil, fmt.Errorf("get order by public id: %w", err)
 	}
 	return o, nil
 }
@@ -149,7 +170,7 @@ func (s *Store) SaveRefill(ctx context.Context, orderID, wizOrderID, wizRefillID
 
 func (s *Store) GetProcessingOrders(ctx context.Context) ([]*models.Order, error) {
 	rows, err := s.pool.Query(ctx, `
-		SELECT id, client_id, package_id, profile_link, total_kes, status, wiz_order_ids, created_at, updated_at
+		SELECT id, COALESCE(public_id, ''), client_id, package_id, profile_link, total_kes, status, wiz_order_ids, created_at, updated_at
 		FROM orders WHERE status = 'processing' AND wiz_order_ids IS NOT NULL
 	`)
 	if err != nil {
@@ -160,7 +181,7 @@ func (s *Store) GetProcessingOrders(ctx context.Context) ([]*models.Order, error
 	var orders []*models.Order
 	for rows.Next() {
 		o := &models.Order{}
-		if err := rows.Scan(&o.ID, &o.ClientID, &o.PackageID, &o.ProfileLink, &o.TotalKES,
+		if err := rows.Scan(&o.ID, &o.PublicID, &o.ClientID, &o.PackageID, &o.ProfileLink, &o.TotalKES,
 			&o.Status, &o.WizOrderIDs, &o.CreatedAt, &o.UpdatedAt); err != nil {
 			return nil, err
 		}
@@ -181,7 +202,7 @@ func (s *Store) GetClientTelegramID(ctx context.Context, orderID int64) (int64, 
 
 func (s *Store) GetClientOrders(ctx context.Context, telegramID int64) ([]*models.Order, error) {
 	rows, err := s.pool.Query(ctx, `
-		SELECT o.id, o.package_id, o.profile_link, o.total_kes, o.status, o.wiz_order_ids, o.created_at, o.updated_at
+		SELECT o.id, COALESCE(o.public_id, ''), o.package_id, o.profile_link, o.total_kes, o.status, o.wiz_order_ids, o.created_at, o.updated_at
 		FROM orders o
 		JOIN clients c ON c.id = o.client_id
 		WHERE c.telegram_id = $1
@@ -197,7 +218,7 @@ func (s *Store) GetClientOrders(ctx context.Context, telegramID int64) ([]*model
 	var orders []*models.Order
 	for rows.Next() {
 		o := &models.Order{}
-		if err := rows.Scan(&o.ID, &o.PackageID, &o.ProfileLink, &o.TotalKES, &o.Status, &o.WizOrderIDs, &o.CreatedAt, &o.UpdatedAt); err != nil {
+		if err := rows.Scan(&o.ID, &o.PublicID, &o.PackageID, &o.ProfileLink, &o.TotalKES, &o.Status, &o.WizOrderIDs, &o.CreatedAt, &o.UpdatedAt); err != nil {
 			return nil, err
 		}
 		orders = append(orders, o)
@@ -239,7 +260,7 @@ func (s *Store) GetPendingSTKTransactions(ctx context.Context) ([]PendingSTKTran
 
 func (s *Store) GetRefillableOrders(ctx context.Context, packageIDs []string) ([]*models.Order, error) {
 	rows, err := s.pool.Query(ctx, `
-		SELECT o.id, o.client_id, o.package_id, o.profile_link, o.total_kes,
+		SELECT o.id, COALESCE(o.public_id, ''), o.client_id, o.package_id, o.profile_link, o.total_kes,
 		       o.status, o.wiz_order_ids, o.created_at, o.updated_at
 		FROM orders o
 		WHERE o.package_id = ANY($1::text[])
@@ -257,7 +278,7 @@ func (s *Store) GetRefillableOrders(ctx context.Context, packageIDs []string) ([
 	var orders []*models.Order
 	for rows.Next() {
 		o := &models.Order{}
-		if err := rows.Scan(&o.ID, &o.ClientID, &o.PackageID, &o.ProfileLink, &o.TotalKES,
+		if err := rows.Scan(&o.ID, &o.PublicID, &o.ClientID, &o.PackageID, &o.ProfileLink, &o.TotalKES,
 			&o.Status, &o.WizOrderIDs, &o.CreatedAt, &o.UpdatedAt); err != nil {
 			return nil, err
 		}
@@ -408,6 +429,16 @@ func generateReferralCode() string {
 	b := make([]byte, 8)
 	for i := range b {
 		b[i] = referralChars[rand.Intn(len(referralChars))]
+	}
+	return string(b)
+}
+
+const publicIDChars = "abcdefghijkmnpqrstuvwxyz23456789"
+
+func generatePublicID() string {
+	b := make([]byte, 7)
+	for i := range b {
+		b[i] = publicIDChars[rand.Intn(len(publicIDChars))]
 	}
 	return string(b)
 }

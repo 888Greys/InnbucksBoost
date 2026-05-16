@@ -22,6 +22,7 @@ import (
 	"github.com/aapom/innbucks/internal/bot"
 	"github.com/aapom/innbucks/internal/db"
 	"github.com/aapom/innbucks/internal/megapay"
+	"github.com/aapom/innbucks/internal/models"
 	"github.com/aapom/innbucks/internal/profile"
 	"github.com/aapom/innbucks/internal/queue"
 	"github.com/aapom/innbucks/internal/smmpanel"
@@ -169,8 +170,9 @@ type createOrderReq struct {
 }
 
 type createOrderResp struct {
-	OrderID int64  `json:"order_id"`
-	Message string `json:"message"`
+	OrderID  int64  `json:"order_id"`
+	PublicID string `json:"public_id"`
+	Message  string `json:"message"`
 }
 
 func ordersHandler(store *db.Store, pay *megapay.Client, tg *tgNotifier) http.HandlerFunc {
@@ -203,7 +205,7 @@ func ordersHandler(store *db.Store, pay *megapay.Client, tg *tgNotifier) http.Ha
 
 		ctx := r.Context()
 
-		orderID, err := store.CreatePendingOrder(ctx, 0, pkg.ID, req.ProfileLink, pkg.PriceKES, req.ReferralCode)
+		orderID, publicID, err := store.CreatePendingOrder(ctx, 0, pkg.ID, req.ProfileLink, pkg.PriceKES, req.ReferralCode)
 		if err != nil {
 			log.Printf("web createOrder: %v", err)
 			jsonError(w, "could not create order", http.StatusInternalServerError)
@@ -242,14 +244,16 @@ func ordersHandler(store *db.Store, pay *megapay.Client, tg *tgNotifier) http.Ha
 		), nil)
 
 		jsonOK(w, createOrderResp{
-			OrderID: orderID,
-			Message: fmt.Sprintf("M-Pesa request sent to %s. Enter your PIN to confirm.", req.Phone),
+			OrderID:  orderID,
+			PublicID: publicID,
+			Message:  fmt.Sprintf("M-Pesa request sent to %s. Enter your PIN to confirm.", req.Phone),
 		})
 	}
 }
 
 type orderStatusResp struct {
 	OrderID     int64  `json:"order_id"`
+	PublicID    string `json:"public_id"`
 	Status      string `json:"status"`
 	PackageName string `json:"package_name"`
 	Platform    string `json:"platform"`
@@ -266,14 +270,21 @@ func orderStatusHandler(store *db.Store) http.HandlerFunc {
 		}
 
 		idStr := strings.TrimPrefix(r.URL.Path, "/api/orders/")
-		var orderID int64
-		fmt.Sscanf(idStr, "%d", &orderID)
-		if orderID == 0 {
+		if idStr == "" {
 			jsonError(w, "invalid order id", http.StatusBadRequest)
 			return
 		}
 
-		order, err := store.GetOrder(r.Context(), orderID)
+		var order *models.Order
+		var err error
+
+		// Try numeric internal ID first (for bot/admin), then public_id string
+		var numID int64
+		if _, scanErr := fmt.Sscanf(idStr, "%d", &numID); scanErr == nil && numID > 0 {
+			order, err = store.GetOrder(r.Context(), numID)
+		} else {
+			order, err = store.GetOrderByPublicID(r.Context(), idStr)
+		}
 		if err != nil {
 			jsonError(w, "order not found", http.StatusNotFound)
 			return
@@ -283,6 +294,7 @@ func orderStatusHandler(store *db.Store) http.HandlerFunc {
 
 		jsonOK(w, orderStatusResp{
 			OrderID:     order.ID,
+			PublicID:    order.PublicID,
 			Status:      string(order.Status),
 			PackageName: pkg.Name,
 			Platform:    string(pkg.Platform),
