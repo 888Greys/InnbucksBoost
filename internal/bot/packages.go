@@ -23,6 +23,13 @@ var Catalog = []models.Package{
 		Description: "Test order — KES 1 only",
 		Components:  []models.PackageComponent{{ServiceID: 9121, Quantity: 100}},
 	},
+	{
+		ID: "tiktok_test_5ksh", Name: "TikTok 5-Bob Test",
+		Platform: models.PlatformTikTok, Category: "tiktok",
+		PriceKES: 5, MarginKES: -11, Refillable: false,
+		Description: "50 Followers",
+		Components:  []models.PackageComponent{{ServiceID: 5760, Quantity: 50}},
+	},
 
 	// ── TikTok ───────────────────────────────────────────────────────────────
 	{
@@ -174,8 +181,8 @@ func CategoryPackages(category string) []models.Package {
 		if p.Category != category {
 			continue
 		}
-		// Only show the new web tier packages in the bot menu
-		if !strings.Contains(p.ID, "_web_") {
+		// Only show web tier packages and named test packages in the bot menu
+		if !strings.Contains(p.ID, "_web_") && p.ID != "tiktok_test_5ksh" {
 			continue
 		}
 		result = append(result, p)
