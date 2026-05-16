@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import {
   FaFacebook, FaInstagram, FaYoutube, FaTelegram, FaSpotify,
-  FaShieldAlt, FaBolt, FaCrown, FaWhatsapp, FaCheckCircle,
+  FaShieldAlt, FaBolt, FaCrown, FaCheckCircle,
   FaChevronLeft, FaChevronRight,
 } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
@@ -136,49 +136,49 @@ const PLATFORM_FEATURES: { [platform: string]: TierFeatures } = {
     "test-drive":  { packageId: "facebook_web_test",        mtpId: 9061, qty: 1000,  delivers: ["1,000 Page Followers", "200 Post Likes", "30-Day Refill", "Delivery starts in minutes"] },
     "starter":     { packageId: "facebook_web_starter",     mtpId: 9061, qty: 3000,  delivers: ["3,000 Page Followers", "500 Post Likes", "30-Day Refill", "Delivery in 6–12 hrs"] },
     "legit":       { packageId: "facebook_web_legit",       mtpId: 9061, qty: 6000,  delivers: ["6,000 Page Followers", "1,000 Post Likes", "60-Day Refill", "Priority Delivery 6–12 hrs", "Free Page Audit"] },
-    "influencer":  { packageId: "facebook_web_influencer",  mtpId: 5798, qty: 12000, delivers: ["12,000 Page Followers", "2,000 Post Likes", "60-Day Refill", "Express Delivery 3–6 hrs", "WhatsApp Support"] },
+    "influencer":  { packageId: "facebook_web_influencer",  mtpId: 5798, qty: 12000, delivers: ["12,000 Page Followers", "2,000 Post Likes", "60-Day Refill", "Express Delivery 3–6 hrs", "Telegram Support"] },
     "bazuu":       { packageId: "facebook_web_bazuu",       mtpId: 5798, qty: 25000, delivers: ["25,000 Page Followers", "5,000 Post Likes", "90-Day Refill", "VIP Express Delivery", "Dedicated Agent", "Strategy Call"] },
   },
   instagram: {
     "test-drive":  { packageId: "instagram_web_test",       mtpId: 7403, qty: 10000,  delivers: ["10,000 Reel Views", "200 Followers", "200 Post Likes", "Lifetime Guaranteed", "Delivery starts in minutes"] },
     "starter":     { packageId: "instagram_web_starter",    mtpId: 7403, qty: 40000,  delivers: ["40,000 Reel Views", "600 Followers", "500 Post Likes", "Lifetime Guaranteed", "Delivery in 6–12 hrs"] },
     "legit":       { packageId: "instagram_web_legit",      mtpId: 7403, qty: 100000, delivers: ["100,000 Reel Views", "1,500 Followers", "1,000 Post Likes", "Lifetime Guaranteed", "Priority Delivery", "Hashtag Tips"] },
-    "influencer":  { packageId: "instagram_web_influencer", mtpId: 7403, qty: 250000, delivers: ["250,000 Reel Views", "4,000 Followers", "2,500 Post Likes", "Lifetime Guaranteed", "Express Delivery", "WhatsApp Support"] },
+    "influencer":  { packageId: "instagram_web_influencer", mtpId: 7403, qty: 250000, delivers: ["250,000 Reel Views", "4,000 Followers", "2,500 Post Likes", "Lifetime Guaranteed", "Express Delivery", "Telegram Support"] },
     "bazuu":       { packageId: "instagram_web_bazuu",      mtpId: 7403, qty: 600000, delivers: ["600,000 Reel Views", "10,000 Followers", "6,000 Post Likes", "Lifetime Guaranteed", "VIP Delivery", "Dedicated Agent"] },
   },
   tiktok: {
     "test-drive":  { packageId: "tiktok_web_test",          mtpId: 4645, qty: 10000,  delivers: ["10,000 Video Views", "200 Followers", "200 Likes", "Algorithm-Safe", "Delivery starts in minutes"] },
     "starter":     { packageId: "tiktok_web_starter",       mtpId: 4645, qty: 40000,  delivers: ["40,000 Video Views", "600 Followers", "600 Likes", "Algorithm-Safe", "Delivery in 6–12 hrs"] },
     "legit":       { packageId: "tiktok_web_legit",         mtpId: 4645, qty: 100000, delivers: ["100,000 Video Views", "1,500 Followers", "1,500 Likes", "Algorithm-Safe", "Priority Delivery", "Content Tips"] },
-    "influencer":  { packageId: "tiktok_web_influencer",    mtpId: 4645, qty: 300000, delivers: ["300,000 Video Views", "4,000 Followers", "4,000 Likes", "Algorithm-Safe", "Express Delivery", "WhatsApp Support"] },
+    "influencer":  { packageId: "tiktok_web_influencer",    mtpId: 4645, qty: 300000, delivers: ["300,000 Video Views", "4,000 Followers", "4,000 Likes", "Algorithm-Safe", "Express Delivery", "Telegram Support"] },
     "bazuu":       { packageId: "tiktok_web_bazuu",         mtpId: 4645, qty: 700000, delivers: ["700,000 Video Views", "10,000 Followers", "8,000 Likes", "Algorithm-Safe", "VIP Delivery", "Dedicated Agent"] },
   },
   youtube: {
     "test-drive":  { packageId: "youtube_web_test",         mtpId: 7759, qty: 2000,   delivers: ["2,000 Video Views", "100 Subscribers", "100 Likes", "30-Day Refill", "Delivery starts in minutes"] },
     "starter":     { packageId: "youtube_web_starter",      mtpId: 7759, qty: 8000,   delivers: ["8,000 Video Views", "400 Subscribers", "300 Likes", "30-Day Refill", "Delivery in 6–12 hrs"] },
     "legit":       { packageId: "youtube_web_legit",        mtpId: 7759, qty: 20000,  delivers: ["20,000 Video Views", "1,000 Subscribers", "700 Likes", "30-Day Refill", "Watch Hours Boost", "Priority Delivery"] },
-    "influencer":  { packageId: "youtube_web_influencer",   mtpId: 7759, qty: 50000,  delivers: ["50,000 Video Views", "2,500 Subscribers", "1,500 Likes", "30-Day Refill", "Watch Hours Boost", "WhatsApp Support"] },
+    "influencer":  { packageId: "youtube_web_influencer",   mtpId: 7759, qty: 50000,  delivers: ["50,000 Video Views", "2,500 Subscribers", "1,500 Likes", "30-Day Refill", "Watch Hours Boost", "Telegram Support"] },
     "bazuu":       { packageId: "youtube_web_bazuu",        mtpId: 7759, qty: 120000, delivers: ["120,000 Video Views", "6,000 Subscribers", "4,000 Likes", "Lifetime Guaranteed", "Watch Hours Boost", "Dedicated Agent"] },
   },
   twitter: {
     "test-drive":  { packageId: "twitter_web_test",         mtpId: 9527, qty: 5000,   delivers: ["5,000 Tweet Views", "150 Followers", "150 Likes", "Algorithm-Safe", "Delivery starts in minutes"] },
     "starter":     { packageId: "twitter_web_starter",      mtpId: 9527, qty: 20000,  delivers: ["20,000 Tweet Views", "500 Followers", "400 Likes", "Algorithm-Safe", "Delivery in 6–12 hrs"] },
     "legit":       { packageId: "twitter_web_legit",        mtpId: 9527, qty: 60000,  delivers: ["60,000 Tweet Views", "1,500 Followers", "1,000 Likes", "Algorithm-Safe", "Retweet Boost", "Priority Delivery"] },
-    "influencer":  { packageId: "twitter_web_influencer",   mtpId: 9527, qty: 150000, delivers: ["150,000 Tweet Views", "4,000 Followers", "2,000 Likes", "Algorithm-Safe", "Retweet Boost", "WhatsApp Support"] },
+    "influencer":  { packageId: "twitter_web_influencer",   mtpId: 9527, qty: 150000, delivers: ["150,000 Tweet Views", "4,000 Followers", "2,000 Likes", "Algorithm-Safe", "Retweet Boost", "Telegram Support"] },
     "bazuu":       { packageId: "twitter_web_bazuu",        mtpId: 9527, qty: 400000, delivers: ["400,000 Tweet Views", "10,000 Followers", "5,000 Likes", "Algorithm-Safe", "VIP Delivery", "Dedicated Agent"] },
   },
   telegram: {
     "test-drive":  { packageId: "telegram_web_test",        mtpId: 8136, qty: 500,   delivers: ["500 Channel Members", "3,000 Post Views", "Algorithm-Safe", "Delivery starts in minutes"] },
     "starter":     { packageId: "telegram_web_starter",     mtpId: 8136, qty: 1500,  delivers: ["1,500 Channel Members", "10,000 Post Views", "Algorithm-Safe", "Delivery in 6–12 hrs"] },
     "legit":       { packageId: "telegram_web_legit",       mtpId: 8136, qty: 4000,  delivers: ["4,000 Channel Members", "30,000 Post Views", "Algorithm-Safe", "Reactions Boost", "Priority Delivery"] },
-    "influencer":  { packageId: "telegram_web_influencer",  mtpId: 8136, qty: 8000,  delivers: ["8,000 Channel Members", "80,000 Post Views", "Algorithm-Safe", "Reactions Boost", "WhatsApp Support"] },
+    "influencer":  { packageId: "telegram_web_influencer",  mtpId: 8136, qty: 8000,  delivers: ["8,000 Channel Members", "80,000 Post Views", "Algorithm-Safe", "Reactions Boost", "Telegram Support"] },
     "bazuu":       { packageId: "telegram_web_bazuu",       mtpId: 8136, qty: 20000, delivers: ["20,000 Channel Members", "200,000 Post Views", "Algorithm-Safe", "VIP Delivery", "Dedicated Agent"] },
   },
   spotify: {
     "test-drive":  { packageId: "spotify_web_test",         mtpId: 3541, qty: 5000,   delivers: ["5,000 Plays", "100 Followers", "Lifetime Guaranteed", "Global Listeners", "Delivery starts in minutes"] },
     "starter":     { packageId: "spotify_web_starter",      mtpId: 3541, qty: 20000,  delivers: ["20,000 Plays", "300 Followers", "Lifetime Guaranteed", "Global Listeners", "Delivery in 6–12 hrs"] },
     "legit":       { packageId: "spotify_web_legit",        mtpId: 3541, qty: 60000,  delivers: ["60,000 Plays", "800 Followers", "Lifetime Guaranteed", "USA + Global", "Playlist Tips", "Priority Delivery"] },
-    "influencer":  { packageId: "spotify_web_influencer",   mtpId: 3541, qty: 150000, delivers: ["150,000 Plays", "2,000 Followers", "Lifetime Guaranteed", "USA + Europe", "Express Delivery", "WhatsApp Support"] },
+    "influencer":  { packageId: "spotify_web_influencer",   mtpId: 3541, qty: 150000, delivers: ["150,000 Plays", "2,000 Followers", "Lifetime Guaranteed", "USA + Europe", "Express Delivery", "Telegram Support"] },
     "bazuu":       { packageId: "spotify_web_bazuu",        mtpId: 3541, qty: 400000, delivers: ["400,000 Plays", "5,000 Followers", "Lifetime Guaranteed", "USA + Europe + Africa", "VIP Delivery", "Dedicated Agent"] },
   },
 };
@@ -187,7 +187,7 @@ const TRUST = [
   { Icon: FaShieldAlt,   label: "Secure M-Pesa",    color: "text-blue-500" },
   { Icon: FaBolt,        label: "Fast Delivery",     color: "text-yellow-500" },
   { Icon: FaCheckCircle, label: "Drop-Proof Refill", color: "text-green-500" },
-  { Icon: FaWhatsapp,    label: "24/7 Support",      color: "text-green-600" },
+  { Icon: FaTelegram,    label: "24/7 Support",      color: "text-sky-500" },
 ];
 
 const FAQS = [
@@ -213,7 +213,7 @@ const TIER_EXTRAS: Record<string, string[]> = {
   "test-drive":  ["Algorithm-Safe", "Delivery starts in minutes"],
   "starter":     ["30-Day Refill", "Delivery in 6–12 hrs"],
   "legit":       ["30-Day Refill", "Priority Delivery"],
-  "influencer":  ["60-Day Refill", "Express Delivery", "WhatsApp Support"],
+  "influencer":  ["60-Day Refill", "Express Delivery", "Telegram Support"],
   "bazuu":       ["90-Day Refill", "VIP Express Delivery", "Dedicated Agent"],
 };
 
@@ -274,6 +274,114 @@ function normalizeProfileUrl(platformId: string, input: string): string {
   return (bases[platformId] ?? "https://") + v;
 }
 
+// ─── Order Status Tracker ─────────────────────────────────────────────────────
+
+const STATUS_META: Record<string, { emoji: string; label: string; color: string }> = {
+  pending:    { emoji: "⏳", label: "Awaiting Payment",  color: "text-yellow-400" },
+  paid:       { emoji: "💰", label: "Payment Confirmed", color: "text-green-400" },
+  processing: { emoji: "🚀", label: "In Progress",       color: "text-blue-400" },
+  completed:  { emoji: "✅", label: "Delivered",         color: "text-green-400" },
+  failed:     { emoji: "⚠️", label: "Failed",            color: "text-red-400" },
+  cancelled:  { emoji: "🚫", label: "Cancelled",         color: "text-gray-400" },
+};
+
+type OrderStatus = {
+  order_id: number;
+  status: string;
+  package_name: string;
+  platform: string;
+  price_kes: number;
+  created_at: string;
+};
+
+function OrderTracker({ apiBase }: { apiBase: string }) {
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<OrderStatus | null>(null);
+  const [err, setErr] = useState("");
+
+  async function check() {
+    const id = parseInt(input.trim(), 10);
+    if (!id) { setErr("Enter a valid order number."); return; }
+    setErr(""); setResult(null); setLoading(true);
+    try {
+      const res = await fetch(`${apiBase}/api/orders/${id}`);
+      if (!res.ok) { setErr("Order not found. Check the number and try again."); return; }
+      setResult(await res.json());
+    } catch {
+      setErr("Could not reach the server. Try again in a moment.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const meta = result ? (STATUS_META[result.status] ?? { emoji: "❓", label: result.status, color: "text-gray-400" }) : null;
+
+  return (
+    <div className="w-full">
+      <div className="flex gap-2">
+        <input
+          type="number"
+          placeholder="Order number e.g. 42"
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => e.key === "Enter" && check()}
+          className="flex-1 bg-gray-800 border border-white/10 text-white placeholder-gray-500 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500"
+        />
+        <button
+          onClick={check}
+          disabled={loading}
+          className="px-5 py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold rounded-xl transition text-sm whitespace-nowrap">
+          {loading ? "Checking…" : "Check"}
+        </button>
+      </div>
+
+      {err && <p className="mt-3 text-red-400 text-sm">{err}</p>}
+
+      {result && meta && (
+        <div className="mt-5 bg-gray-800 border border-white/10 rounded-2xl p-5 text-left">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-3xl">{meta.emoji}</span>
+            <div>
+              <p className={`font-bold text-lg ${meta.color}`}>{meta.label}</p>
+              <p className="text-gray-500 text-xs">Order #{result.order_id}</p>
+            </div>
+          </div>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <span className="text-gray-400">Package</span>
+              <span className="text-white font-medium">{result.package_name}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Platform</span>
+              <span className="text-white capitalize">{result.platform}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Amount</span>
+              <span className="text-white">KES {result.price_kes}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Placed</span>
+              <span className="text-white">{new Date(result.created_at).toLocaleString("en-KE", { dateStyle: "medium", timeStyle: "short" })}</span>
+            </div>
+          </div>
+          {result.status === "processing" && (
+            <p className="mt-4 text-xs text-blue-300 bg-blue-900/30 rounded-xl px-4 py-2">
+              Your order is being delivered. Followers typically start arriving within 0–30 minutes.
+            </p>
+          )}
+          {result.status === "failed" && (
+            <a href="https://t.me/workratew" target="_blank" rel="noopener noreferrer"
+              className="mt-4 flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-sky-500 hover:bg-sky-600 text-white text-sm font-semibold transition">
+              <FaTelegram size={16} /> Contact Support on Telegram
+            </a>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function PaymentModal({ order, platformFeatures, onClose }: { order: Order; platformFeatures: typeof PLATFORM_FEATURES; onClose: () => void }) {
   const [phone, setPhone] = useState("");
   const [profileInput, setProfileInput] = useState("");
@@ -312,7 +420,7 @@ function PaymentModal({ order, platformFeatures, onClose }: { order: Order; plat
         if (status === "completed" || status === "failed" || status === "cancelled") {
           stopPolling();
           if (status === "failed" || status === "cancelled") {
-            setErrMsg("Order failed. Please contact support on WhatsApp.");
+            setErrMsg("Order failed. Please contact support on Telegram @workratew.");
             setStage("error");
           }
         }
@@ -321,7 +429,7 @@ function PaymentModal({ order, platformFeatures, onClose }: { order: Order; plat
       }
       if (attempts >= MAX && !transitioned) {
         stopPolling();
-        setErrMsg("Payment not confirmed in time. If you entered your PIN, WhatsApp us and we'll confirm manually.");
+        setErrMsg("Payment not confirmed in time. If you entered your PIN, contact us on Telegram @workratew and we'll confirm manually.");
         setStage("error");
       }
     }, 5000);
@@ -482,9 +590,9 @@ function PaymentModal({ order, platformFeatures, onClose }: { order: Order; plat
                 </p>
               )}
 
-              <a href="https://wa.me/254700000000" target="_blank" rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-green-600 hover:bg-green-700 text-white font-semibold transition mb-3">
-                <FaWhatsapp size={18} /> WhatsApp Support
+              <a href="https://t.me/workratew" target="_blank" rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-semibold transition mb-3">
+                <FaTelegram size={18} /> Telegram Support
               </a>
               <button onClick={onClose} className="w-full py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm font-medium transition">
                 Close
@@ -498,9 +606,9 @@ function PaymentModal({ order, platformFeatures, onClose }: { order: Order; plat
               <div className="text-5xl mb-4">⚠️</div>
               <h3 className="text-xl font-bold text-white mb-2">Payment Issue</h3>
               <p className="text-gray-400 text-sm leading-relaxed mb-6">{errMsg}</p>
-              <a href="https://wa.me/254700000000" target="_blank" rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-green-600 hover:bg-green-700 text-white font-semibold transition mb-3">
-                <FaWhatsapp size={18} /> Contact Support on WhatsApp
+              <a href="https://t.me/workratew" target="_blank" rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-semibold transition mb-3">
+                <FaTelegram size={18} /> Contact Support on Telegram
               </a>
               <button onClick={() => { setStage("form"); setErrMsg(""); }}
                 className="w-full py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm font-medium transition">
@@ -753,6 +861,10 @@ export default function Home() {
               className="bg-white/10 hover:bg-white/15 text-white font-semibold text-lg px-8 py-4 rounded-2xl border border-white/10 transition">
               How It Works
             </button>
+            <button onClick={() => scrollTo("track")}
+              className="bg-white/10 hover:bg-white/15 text-white font-semibold text-lg px-8 py-4 rounded-2xl border border-white/10 transition">
+              Track Order
+            </button>
           </div>
 
           <div className="mt-12 flex flex-wrap justify-center gap-3">
@@ -807,12 +919,12 @@ export default function Home() {
           </div>
 
           {/* Support note */}
-          <div className="mt-8 flex items-center gap-4 bg-green-900/30 border border-green-700/40 rounded-2xl px-6 py-4">
-            <FaWhatsapp size={28} className="text-green-400 flex-shrink-0" />
+          <div className="mt-8 flex items-center gap-4 bg-sky-900/30 border border-sky-700/40 rounded-2xl px-6 py-4">
+            <FaTelegram size={28} className="text-sky-400 flex-shrink-0" />
             <div>
               <p className="text-white font-semibold text-sm">Bought a package? We&apos;re here for you.</p>
               <p className="text-gray-400 text-xs mt-0.5">
-                After your purchase, WhatsApp our support team for order updates, questions, or any help. Available 24/7.
+                After your purchase, message our support team on Telegram @workratew for order updates, questions, or any help. Available 24/7.
               </p>
             </div>
           </div>
@@ -923,6 +1035,16 @@ export default function Home() {
               <p className="mt-3 text-gray-400 text-sm leading-relaxed">{item.a}</p>
             </details>
           ))}
+        </div>
+      </section>
+
+      {/* ── Order Status Checker ── */}
+      <section id="track" className="py-20 px-4 bg-gray-900 border-t border-white/5">
+        <div className="max-w-lg mx-auto text-center">
+          <span className="text-blue-400 text-xs font-bold uppercase tracking-widest">Real-Time Tracking</span>
+          <h2 className="text-3xl font-extrabold text-white mt-2 mb-1">Check Your Order</h2>
+          <p className="text-gray-500 text-sm mb-8">Enter the order number you received after payment.</p>
+          <OrderTracker apiBase={process.env.NEXT_PUBLIC_API_URL ?? ""} />
         </div>
       </section>
 
