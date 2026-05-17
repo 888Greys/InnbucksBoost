@@ -443,7 +443,7 @@ function PaymentModal({ order, platformFeatures, onClose }: { order: Order; plat
       if (!res.ok) throw new Error(data.error ?? "Failed to send M-Pesa request");
       setOrderId(data.public_id || String(data.order_id));
       setStage("waiting");
-      startPolling(data.public_id || String(data.order_id));
+      startPolling(String(data.order_id));
     } catch (err: unknown) {
       setErrMsg(err instanceof Error ? err.message : "Something went wrong. Please retry.");
     } finally {
